@@ -5,7 +5,7 @@ import (
 	"github.com/codegangsta/martini-contrib/binding"
 	"github.com/codegangsta/martini-contrib/gzip"
 	"github.com/codegangsta/martini-contrib/render"
-	"github.com/ericflo/irlmoji/lib/models"
+	"github.com/ericflo/irlmoji/src/models"
 	_ "github.com/lib/pq"
 	"github.com/martini-contrib/auth"
 	"log"
