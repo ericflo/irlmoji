@@ -1,1 +1,28 @@
-run-with-env.sh
+env.json
+build
+
+# Go stuff
+*.o
+*.a
+*.so
+_obj
+_test
+*.[568vq]
+[568vq].out
+*.cgo1.go
+*.cgo2.c
+_cgo_defun.c
+_cgo_gotypes.go
+_cgo_export.*
+_testmain.go
+*.exe
+*.test
+
+# Node stuff
+node_modules
+*.pid
+logs
+*.log
+lib-cov
+coverage
+build/Release
