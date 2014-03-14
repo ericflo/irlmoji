@@ -26,3 +26,6 @@ logs
 lib-cov
 coverage
 build/Release
+
+# UGH
+.DS_Store
