@@ -17,6 +17,7 @@ _cgo_export.*
 _testmain.go
 *.exe
 *.test
+gin-bin
 
 # Node stuff
 node_modules
