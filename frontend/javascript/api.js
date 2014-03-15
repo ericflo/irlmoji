@@ -1,46 +1,62 @@
 var request = require('superagent');
 var _ = require('lodash/dist/lodash.underscore');
 
+function handleErrors(callback) {
+  return function(error, res) {
+    if (error) {
+      return callback(error, res);
+    }
+    if (res.body.error) {
+      return callback(res.body.error, res);
+    }
+    return callback(error, res);
+  };
+}
+
 function setupApi(opts) {
   var urlBase = opts.urlBase;
   var csrf = opts.csrf || null;
-  var authUsername = opts.authUsername;
-  var req = opts.req;
 
-  // If we passed in the request (server), we can reconstruct the password
-  if (req) {
-    if (req.session['uid']) {
-      opts.authPassword = req.session['uid'] + '_' + req.session['gid'];
-    }
+  function getCurrentUser(callback) {
+    request
+      .get(urlBase + '/api/v1/users/current.json')
+      .set('Accept', 'application/json')
+      .end(handleErrors(callback));
   }
 
-  function authed(r) {
-    if (opts.authUsername && opts.authPassword) {
-      r = r.auth(opts.authUsername, opts.authPassword);
-    }
-    return r;
+  function createUserByTwitter(accessToken, accessSecret, callback) {
+    request
+      .post(urlBase + '/api/v1/users/twitter.json')
+      .type('json')
+      .send({
+        twitterAccessToken: accessToken,
+        twitterAccessSecret: accessSecret
+      })
+      .set('Accept', 'application/json')
+      .set('X-CSRF-Token', csrf)
+      .end(handleErrors(callback));
   }
 
   function getHomeTimeline(callback) {
-    authed(request
+    request
       .get(urlBase + '/api/v1/timelines/home.json')
       .set('Accept', 'application/json')
-    ).end(callback);
+      .end(handleErrors(callback));
   }
 
   function getUserTimeline(username, callback) {
-    authed(request
+    request
       .get(urlBase + '/api/v1/timelines/user/username/' + username + '.json')
       .set('Accept', 'application/json')
-    ).end(callback);
+      .end(handleErrors(callback));
   }
 
-  var api = {
+  return {
+    getCurrentUser: getCurrentUser,
+    createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
     getUserTimeline: getUserTimeline
   };
-
-  return api;
 }
 
 module.exports = {

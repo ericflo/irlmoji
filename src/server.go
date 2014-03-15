@@ -16,10 +16,14 @@ const DEFAULT_LIMIT uint32 = 50
 
 var IRLMOJI_API_BASIC_USER string
 var IRLMOJI_DBURI string
+var TWITTER_CONSUMER_KEY string
+var TWITTER_CONSUMER_SECRET string
 
 func readEnv() {
 	IRLMOJI_API_BASIC_USER = os.Getenv("IRLMOJI_API_BASIC_USER")
 	IRLMOJI_DBURI = os.Getenv("IRLMOJI_DBURI")
+	TWITTER_CONSUMER_KEY = os.Getenv("TWITTER_CONSUMER_KEY")
+	TWITTER_CONSUMER_SECRET = os.Getenv("TWITTER_CONSUMER_SECRET")
 }
 
 func createAllTables(db *models.DB) error {
@@ -46,32 +50,15 @@ func JsonErr(err string) map[string]string {
 	return map[string]string{"error": err}
 }
 
+func JsonErrBinding(err binding.Errors) map[string]interface{} {
+	return map[string]interface{}{"error": map[string]interface{}{
+		"fields":  err.Fields,
+		"overall": err.Overall,
+	}}
+}
+
 func HandleIndex(r render.Render) {
 	r.JSON(200, map[string]string{"hello": "you've reached the irlmoji api"})
-}
-
-func HandleGetHomeTimeline(r render.Render, limit Limit, db *models.DB) {
-	timeline, err := db.GetAllIMs(limit.Limit)
-	if err != nil {
-		r.JSON(500, JsonErr("Internal error: "+err.Error()))
-		return
-	}
-	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
-}
-
-func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB) {
-	user, err := db.GetUserWithUsername(params["username"])
-	if err != nil {
-		r.JSON(404, JsonErr("Username '"+params["username"]+"' not found."))
-		return
-	}
-	timeline, err := db.GetIMsForUser(user.Id, limit.Limit)
-	if err != nil {
-		log.Println("Error getting IMs for user", user.Username, err.Error())
-		r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
-		return
-	}
-	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
 }
 
 func HandleNotFound(r render.Render) {
@@ -105,8 +92,15 @@ func Main() {
 
 	// Map the URL routes
 	m.Get("/", HandleIndex)
+
+	// User routes (see handlers_user.go)
+	m.Get("/api/v1/users/current.json", HandleGetCurrentUser)
+	m.Post("/api/v1/users/twitter.json", binding.Form(models.UserForm{}), HandleCreateUserByTwitter)
+
+	// Timelines (see handlers_timeline.go)
 	m.Get("/api/v1/timelines/home.json", binding.Form(Limit{}), HandleGetHomeTimeline)
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
+
 	m.NotFound(HandleNotFound)
 
 	m.Run()

@@ -8,8 +8,8 @@ var React = require('react/addons');
 var uuid = require('node-uuid');
 var _ = require('lodash/dist/lodash.underscore');
 
-var routerBuilder = require('./build/javascript/router/server');
-var routesBuilder = require('./build/javascript/routes');
+var makeRouter = require('./build/javascript/router').makeRouter;
+var routes = require('./build/javascript/routes');
 var apiBuilder = require('./build/javascript/api');
 
 var ENV_WARNING = ('WARNING: Could not read env.json file, so unless ' +
@@ -42,6 +42,7 @@ var IRLMOJI_COOKIE_SECRET = process.env['IRLMOJI_COOKIE_SECRET'];
 var IRLMOJI_PROXY_BACKEND_URL = process.env['IRLMOJI_PROXY_BACKEND_URL'];
 var TWITTER_CONSUMER_KEY = process.env['TWITTER_CONSUMER_KEY'];
 var TWITTER_CONSUMER_SECRET = process.env['TWITTER_CONSUMER_SECRET'];
+var TWITTER_CALLBACK_URL = process.env['TWITTER_CALLBACK_URL'];
 var FRONTEND_URL = process.env['FRONTEND_URL'];
 var API_URL = process.env['API_URL'];
 
@@ -67,9 +68,9 @@ function fixConnectCookieSessionHandler(req, res, next) {
 }
 
 function guestHandler(req, res, next) {
-  var guestId = req.session['gid'];
+  var guestId = req.session.gid;
   if (!guestId) {
-    req.session['gid'] = '' + uuid.v1();
+    req.session.gid = '' + uuid.v1();
   }
   return next();
 }
@@ -78,8 +79,8 @@ function apiProxyHandler(req, res, next) {
   if (req.url.indexOf('/api') !== 0) {
     return next();
   }
-  var uid = req.session['uid'] || 0;
-  var gid = req.session['gid'];
+  var uid = req.session.uid || 0;
+  var gid = req.session.gid;
   var userPass = new Buffer(IRLMOJI_API_BASIC_USER + ':' + uid + '_' + gid,
     'ascii');
   req.headers.authorization = 'Basic ' + userPass.toString('base64');
@@ -91,36 +92,86 @@ function logoutHandler(req, res, next) {
   if (req.url !== '/logout') {
     return next();
   }
-  req.session['uid'] = null;
+  req.session.uid = null;
   res.writeHead(302, {'Location': '/'});
   res.end();
 }
 
+function twitterAuthHandler(req, res, next) {
+  if (req.url.indexOf('/auth/twitter') !== 0) {
+    return next();
+  }
+  var oauth = new OAuth.OAuth(
+    'https://api.twitter.com/oauth/request_token',
+    'https://api.twitter.com/oauth/access_token',
+    TWITTER_CONSUMER_KEY,
+    TWITTER_CONSUMER_SECRET,
+    '1.0A',
+    TWITTER_CALLBACK_URL,
+    'HMAC-SHA1'
+  );
+  if (req.url.indexOf('/auth/twitter/callback') === 0) {
+    var oauthToken = req.session.oauthRequestToken;
+    var oauthTokenSecret = req.session.oauthRequestTokenSecret;
+    oauth.getOAuthAccessToken(oauthToken, oauthTokenSecret,
+      req.query.oauth_verifier, function(error, oauthAccessToken,
+                                         oauthAccessTokenSecret, results) {
+      if (error) {
+        console.log(
+          'Error verifying your Twitter credentials: ' + util.inspect(error));
+        res.writeHead(500, {'Content-Type': 'text/html'});
+        res.end('<script>window.close()</script>');
+        return;
+      }
+      req.session.oauthAccessToken = oauthAccessToken;
+      req.session.oauthAccessTokenSecret = oauthAccessTokenSecret;
+
+      var api = apiBuilder.setupApi({urlBase: API_URL, csrf: req.csrfToken()});
+      api.createUserByTwitter(oauthAccessToken, oauthAccessTokenSecret, _.bind(function(error, resp) {
+        req.session.uid = resp.body.user.id;
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.end('<script>window.close()</script>');
+      }, this));
+    });
+  } else {
+    oauth.getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret,
+                                        results) {
+      if (error) {
+        console.log('Error connecting to Twitter: ' + util.inspect(error));
+        res.writeHead(302, {'Location': '/auth/twitter'});
+        res.end();
+        return;
+      }
+      req.session.oauthRequestToken = oauthToken;
+      req.session.oauthRequestTokenSecret = oauthTokenSecret;
+      res.writeHead(302, {'Location':
+        'https://twitter.com/oauth/authorize?oauth_token=' + oauthToken});
+      res.end();
+    });
+  }
+}
+
 function reactHandler(req, res, next) {
-  var api = apiBuilder.setupApi({
-    req: req,
-    urlBase: API_URL,
-    csrf: req.csrfToken()
-  });
+  var api = apiBuilder.setupApi({urlBase: API_URL, csrf: req.csrfToken()});
 
   function render(reactElt, opts) {
     opts = opts || {};
-    var scriptPath = 'build/javascript/compiled' + (PROD ? '.min' : '') + '.js';
-    var scriptVersion = getHashForFilename(scriptPath);
-    var stylePath = 'build/styles/main' + (PROD ? '.min' : '') + '.css';
-    var styleVersion = getHashForFilename(stylePath);
+    var scriptPath = 'javascript/compiled' + (PROD ? '.min' : '') + '.js';
+    var scriptVersion = getHashForFilename('build/' + scriptPath);
+    var stylePath = 'styles/main' + (PROD ? '.min' : '') + '.css';
+    var styleVersion = getHashForFilename('build/' + stylePath);
     var sub = {
       EXTRA_HEAD: opts.extraHead || '',
       BODY_CLASS: opts.bodyClass || '',
       BODY_CONTENT: React.renderComponentToString(reactElt),
-      DATA_BOOTSTRAP: JSON.stringify(opts.bootstrap || ''),
+      USER_ID: req.session.uid || 'null',
       CSRF_TOKEN: req.csrfToken(),
       SCRIPT_PATH: '/' + scriptPath + '?v=' + scriptVersion,
       STYLE_PATH: '/' + stylePath + '?v=' + styleVersion,
       PAGE_TITLE: opts.pageTitle || 'IRLMoji'
     };
     var re = new RegExp('{{ (' + _.keys(sub).join('|') + ') }}', 'g');
-    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.writeHead(opts.statusCode || 200, {'Content-Type': 'text/html'});
     res.end(('' + PAGE_TEMPLATE).replace(re, function(m) {
       return sub[m.substring(3, m.length - 3)];
     }));
@@ -128,8 +179,10 @@ function reactHandler(req, res, next) {
 
   var app = {
     render: render,
-    router: router,
     api: api,
+    getUserId: function() {
+      return req.session.uid || null;
+    },
     isServer: function() {
       return true;
     },
@@ -142,9 +195,9 @@ function reactHandler(req, res, next) {
     }
   }
 
-  var router = routerBuilder.makeRouter(
-    routesBuilder.getRoutes(app),
-    routesBuilder.getNotFound(app)
+  var router = makeRouter(
+    routes.getRoutes(app),
+    routes.getNotFound(app)
   );
 
   router.route(app.getPath());

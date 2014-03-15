@@ -11,6 +11,10 @@ import (
 const ENV_WARNING string = ("WARNING: Could not read env.json file, so unless " +
 	"you've set the environment variables manually, the app will not work.")
 
+// Reads env.json, which should contain a single JSON object, and adds all the
+// key/value pairs from that object into the environment as environment
+// variables.  Ideally this would be done by something like envdir, but this is
+// a bit easier.
 func readEnv() {
 	file, err := ioutil.ReadFile("./env.json")
 	if err != nil {

@@ -3,17 +3,19 @@ package models
 import (
 	"errors"
 	"fmt"
+	"github.com/codegangsta/martini-contrib/binding"
 	_ "github.com/lib/pq"
+	"net/http"
 	"time"
 )
 
 type User struct {
-	Id                  string    `json:"id"`
-	Username            string    `json:"username"`
-	TwitterAccessToken  string    `json:"-"`
-	TwitterAccessSecret string    `json:"-"`
-	TimeCreated         time.Time `json:"time_created"`
-	TimeUpdated         time.Time `json:"time_updated"`
+	Id                  string    `json:"id" binding:"required"`
+	Username            string    `json:"username" binding:"required"`
+	TwitterAccessToken  string    `json:"-" binding:"required"`
+	TwitterAccessSecret string    `json:"-" binding:"required"`
+	TimeCreated         time.Time `json:"timeCreated"`
+	TimeUpdated         time.Time `json:"timeUpdated"`
 }
 
 func (user *User) CreateTableSQL() string {
@@ -27,6 +29,18 @@ func (user *User) CreateTableSQL() string {
         time_updated timestamp NOT NULL
     );
     `
+}
+
+// This is needed because we don't want to expose the access token/secret
+// normally, but we do want to ingest them, and martini's binding module isn't
+// expressive enough to represent that concisely.
+type UserForm struct {
+	TwitterAccessToken  string `json:"twitterAccessToken" binding:"required"`
+	TwitterAccessSecret string `json:"twitterAccessSecret" binding:"required"`
+}
+
+func (userForm UserForm) Validate(errors *binding.Errors, req *http.Request) {
+	// TODO (although I'm not crazy about this API that binding exposes.)
 }
 
 // DATABASE ACCESS STUFF

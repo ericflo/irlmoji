@@ -7,23 +7,22 @@ import (
 	"github.com/codegangsta/martini-contrib/render"
 	"log"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 const AUTH_MESSAGE string = "You must provide authorization."
 
 type Backchannel interface {
-	UserId() uint64
+	UserId() string
 	GuestId() string
 }
 
 type BackchannelUser struct {
-	Uid uint64
+	Uid string
 	Gid string
 }
 
-func (bu BackchannelUser) UserId() uint64 {
+func (bu BackchannelUser) UserId() string {
 	return bu.Uid
 }
 
@@ -31,7 +30,7 @@ func (bu BackchannelUser) GuestId() string {
 	return bu.Gid
 }
 
-func secureCompare(given, actual string) bool {
+func SecureCompare(given, actual string) bool {
 	if subtle.ConstantTimeEq(int32(len(given)), int32(len(actual))) == 1 {
 		return subtle.ConstantTimeCompare([]byte(given), []byte(actual)) == 1
 	} else {
@@ -55,13 +54,13 @@ func BackchannelAuth(basicUsername string) martini.Handler {
 		auth = auth[6:]
 		data, err := base64.StdEncoding.DecodeString(auth)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println("Error decoding auth string:", err.Error())
 			r.JSON(400, JsonErr("The provided auth header was invalid."))
 			return
 		}
 		authParts := strings.Split(string(data), ":")
 		if len(authParts) != 2 {
-			log.Println(err.Error())
+			log.Println("Error splitting auth string:", err.Error())
 			r.JSON(400, JsonErr("The provided auth header was invalid."))
 			return
 		}
@@ -72,20 +71,16 @@ func BackchannelAuth(basicUsername string) martini.Handler {
 			r.JSON(400, JsonErr("The provided auth header was invalid."))
 			return
 		}
-		if !secureCompare(authParts[0], IRLMOJI_API_BASIC_USER) {
+		if !SecureCompare(authParts[0], IRLMOJI_API_BASIC_USER) {
 			log.Println("Invalid basic auth user attempt:", authParts[0])
-			r.JSON(401, JsonErr("The provided credentials were invalid."))
+			r.JSON(403, JsonErr("The provided credentials were invalid."))
 			return
 		}
-		userId, err := strconv.ParseUint(userParts[0], 10, 64)
-		if err != nil {
-			log.Println(err.Error())
-			r.JSON(400, JsonErr("The provided auth header was invalid."))
+		var userId string
+		if userParts[0] != "0" {
+			userId = userParts[0]
 		}
-		backchannel := BackchannelUser{
-			Uid: userId,
-			Gid: userParts[1],
-		}
+		backchannel := BackchannelUser{Uid: userId, Gid: userParts[1]}
 		c.MapTo(&backchannel, (*Backchannel)(nil))
 	}
 }

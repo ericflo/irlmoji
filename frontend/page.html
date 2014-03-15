@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta content="yes" name="apple-mobile-web-app-capable">
   <title>{{ PAGE_TITLE }}</title>
+  <script>window.userId = {{ USER_ID }};</script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-shim.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-sham.min.js"></script>
   {{ EXTRA_HEAD }}
@@ -15,7 +16,6 @@
 </head>
 <body class="{{ BODY_CLASS }}">
   <div id="react-root">{{ BODY_CONTENT }}</div>
-  <script type="application/json" id="data-bootstrap">{{ DATA_BOOTSTRAP }}</script>
   <input style="display: none" type="hidden" id="csrftoken" name="csrf" value="{{ CSRF_TOKEN }}" />
   <script src="{{ SCRIPT_PATH }}"></script>
 </body>

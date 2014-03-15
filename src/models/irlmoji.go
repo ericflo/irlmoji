@@ -10,10 +10,10 @@ import (
 
 type IRLMoji struct {
 	Id          uint64    `json:"id"`
-	UserId      string    `json:"user_id"`
+	UserId      string    `json:"userId"`
 	Emoji       string    `json:"emoji" binding:"required"`
 	Picture     string    `json:"picture" binding:"required"`
-	TimeCreated time.Time `json:"time_created"`
+	TimeCreated time.Time `json:"timeCreated"`
 	User        User      `json:"user"`
 }
 
@@ -30,7 +30,7 @@ func (im *IRLMoji) CreateTableSQL() string {
 }
 
 func (im IRLMoji) Validate(errors *binding.Errors, req *http.Request) {
-	// TODO
+	// TODO (although I'm not crazy about this API that binding exposes.)
 }
 
 const BASE_QUERY string = `

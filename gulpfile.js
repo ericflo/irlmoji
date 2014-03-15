@@ -14,6 +14,8 @@ gulp.task('clean', function() {
   return gulp.src(['build/*'], {read: false}).pipe(clean());
 });
 
+// Parse and compress JS and JSX files
+
 gulp.task('javascript', function() {
   return gulp.src('frontend/**/*.js')
     .pipe(react())
@@ -22,6 +24,8 @@ gulp.task('javascript', function() {
     .pipe(rename({suffix: '.min'}))
     .pipe(gulp.dest('build/'));
 });
+
+// Browserify the source tree into a client-side library
 
 function browserifyTask() {
   return gulp.src('build/javascript/client.js')
@@ -38,6 +42,8 @@ function browserifyTask() {
 gulp.task('browserify', ['javascript'], browserifyTask);
 gulp.task('browserify_nodep', browserifyTask);
 
+// Compile and minify less
+
 gulp.task('styles', function() {
   return gulp.src('frontend/**/*.less')
     .pipe(less())
@@ -46,6 +52,8 @@ gulp.task('styles', function() {
     .pipe(rename({suffix: '.min'}))
     .pipe(gulp.dest('build/'));
 });
+
+// Local development (live reloading)
 
 gulp.task('watch', ['clean'], function() {
   var watching = false;
@@ -58,8 +66,7 @@ gulp.task('watch', ['clean'], function() {
       gulp.watch('frontend/**/*.less', ['styles']);
       nodemon({
         script: 'server.js',
-        watch: ['build/javascript/compiled.js', 'server.js', 'gulpfile.js', 'env.json']/*,
-        delay: 0.5*/
+        watch: ['build/javascript/compiled.js', 'server.js', 'gulpfile.js', 'env.json']
       });
     }
   });

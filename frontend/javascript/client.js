@@ -1,8 +1,8 @@
 var React = require('react/addons');
 var _ = require('lodash/dist/lodash.underscore');
 
-var routerBuilder = require('./router/server');
-var routesBuilder = require('./routes');
+var makeRouter = require('./router').makeRouter;
+var routes = require('./routes');
 var apiBuilder = require('./api');
 
 // So that Chrome developer tools sees that React is installed
@@ -22,15 +22,12 @@ function render(reactElt, opts) {
   window.currentPage = React.renderComponent(reactElt, elt);
 }
 
-var router = routerBuilder.makeRouter(
-  routesBuilder.getRoutes(app),
-  routesBuilder.getNotFound(app)
-);
-
 var app = {
   render: render,
-  router: router,
   api: api,
+  getUserId: function() {
+    return window.userId || null;
+  },
   isServer: function() {
     return false;
   },
@@ -41,6 +38,12 @@ var app = {
     return window.location.pathname + window.location.search;
   }
 };
+
+var router = makeRouter(
+  routes.getRoutes(app),
+  routes.getNotFound(app)
+);
+
 window.app = app;
 
 router.start();
