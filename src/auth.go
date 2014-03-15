@@ -67,11 +67,13 @@ func BackchannelAuth(basicUsername string) martini.Handler {
 		}
 		userParts := strings.Split(authParts[1], "_")
 		if len(userParts) != 2 {
-			log.Println(err.Error())
+			log.Println("WARNING: Correct basic auth user but wrong pass:",
+				auth)
 			r.JSON(400, JsonErr("The provided auth header was invalid."))
 			return
 		}
 		if !secureCompare(authParts[0], IRLMOJI_API_BASIC_USER) {
+			log.Println("Invalid basic auth user attempt:", authParts[0])
 			r.JSON(401, JsonErr("The provided credentials were invalid."))
 			return
 		}
