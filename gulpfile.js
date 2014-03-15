@@ -48,12 +48,14 @@ gulp.task('styles', function() {
 });
 
 gulp.task('watch', ['clean'], function() {
-  var i = 0;
+  var watching = false;
   gulp.start('browserify', 'styles', function() {
-    gulp.watch('frontend/**/*.js', ['javascript']);
-    gulp.watch('build/javascript/client.js', ['browserify_nodep']);
-    gulp.watch('frontend/**/*.less', ['styles']);
-    if (++i === 1) {
+    // Protect against this function being called twice
+    if (!watching) {
+      watching = true;
+      gulp.watch('frontend/**/*.js', ['javascript']);
+      gulp.watch('build/javascript/client.js', ['browserify_nodep']);
+      gulp.watch('frontend/**/*.less', ['styles']);
       nodemon({
         script: 'server.js',
         watch: ['build/javascript/compiled.js', 'server.js', 'gulpfile.js', 'env.json']/*,
