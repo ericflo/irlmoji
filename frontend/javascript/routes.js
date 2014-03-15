@@ -11,7 +11,9 @@ var auth = require('./components/auth');
 function authed(app, func) {
   if (!app.getUserId()) {
     var Auth = auth.Auth;
-    return app.render(<Auth />);
+    return function() {
+      app.render(<Auth />);
+    }
   }
   return function() {
     return _.partial(func, app).apply(null, arguments);

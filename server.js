@@ -3,9 +3,11 @@
 var connect = require('connect');
 var crypto = require('crypto');
 var fs = require('fs');
+var util = require('util');
 var httpProxy = require('http-proxy');
 var React = require('react/addons');
 var uuid = require('node-uuid');
+var OAuth = require('oauth');
 var _ = require('lodash/dist/lodash.underscore');
 
 var makeRouter = require('./build/javascript/router').makeRouter;
@@ -123,11 +125,19 @@ function twitterAuthHandler(req, res, next) {
         res.end('<script>window.close()</script>');
         return;
       }
-      req.session.oauthAccessToken = oauthAccessToken;
-      req.session.oauthAccessTokenSecret = oauthAccessTokenSecret;
-
-      var api = apiBuilder.setupApi({urlBase: API_URL, csrf: req.csrfToken()});
+      var api = apiBuilder.setupApi({
+        urlBase: API_URL,
+        csrf: req.csrfToken(),
+        authUsername: IRLMOJI_API_BASIC_USER,
+        authPassword: (req.session.uid || 0) + '_' + req.session.gid
+      });
       api.createUserByTwitter(oauthAccessToken, oauthAccessTokenSecret, _.bind(function(error, resp) {
+        console.log(resp.body);
+        if (error) {
+          // TODO: What should we really do here? Show it again with an error?
+          res.writeHead(500, {'Content-Type': 'text/html'});
+          return res.end('<script>window.close()</script>');
+        }
         req.session.uid = resp.body.user.id;
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end('<script>window.close()</script>');
@@ -152,7 +162,12 @@ function twitterAuthHandler(req, res, next) {
 }
 
 function reactHandler(req, res, next) {
-  var api = apiBuilder.setupApi({urlBase: API_URL, csrf: req.csrfToken()});
+  var api = apiBuilder.setupApi({
+    urlBase: API_URL,
+    csrf: req.csrfToken(),
+    authUsername: IRLMOJI_API_BASIC_USER,
+    authPassword: (req.session.uid || 0) + '_' + req.session.gid
+  });
 
   function render(reactElt, opts) {
     opts = opts || {};
@@ -221,9 +236,8 @@ var server = connect()
   .use(apiProxyHandler)
   .use(connect.urlencoded())
   .use(connect.query())
-  .use(connect.json());
-  // AUTH HANDLER
-server = server
+  .use(connect.json())
   .use(logoutHandler)
+  .use(twitterAuthHandler)
   .use(reactHandler)
   .listen(5000);

@@ -16,17 +16,24 @@ function handleErrors(callback) {
 function setupApi(opts) {
   var urlBase = opts.urlBase;
   var csrf = opts.csrf || null;
+  var authUsername = opts.authUsername;
+  var authPassword = opts.authPassword;
+
+  function authed(req) {
+    if (authUsername && authPassword) {
+      req = req.auth(authUsername, authPassword);
+    }
+    return req;
+  }
 
   function getCurrentUser(callback) {
-    request
-      .get(urlBase + '/api/v1/users/current.json')
+    authed(request.get(urlBase + '/api/v1/users/current.json'))
       .set('Accept', 'application/json')
       .end(handleErrors(callback));
   }
 
   function createUserByTwitter(accessToken, accessSecret, callback) {
-    request
-      .post(urlBase + '/api/v1/users/twitter.json')
+    authed(request.post(urlBase + '/api/v1/users/twitter.json'))
       .type('json')
       .send({
         twitterAccessToken: accessToken,
@@ -38,15 +45,14 @@ function setupApi(opts) {
   }
 
   function getHomeTimeline(callback) {
-    request
-      .get(urlBase + '/api/v1/timelines/home.json')
+    authed(request.get(urlBase + '/api/v1/timelines/home.json'))
       .set('Accept', 'application/json')
       .end(handleErrors(callback));
   }
 
   function getUserTimeline(username, callback) {
-    request
-      .get(urlBase + '/api/v1/timelines/user/username/' + username + '.json')
+    var url = urlBase + '/api/v1/timelines/user/username/' + username + '.json';
+    authed(request.get(url))
       .set('Accept', 'application/json')
       .end(handleErrors(callback));
   }

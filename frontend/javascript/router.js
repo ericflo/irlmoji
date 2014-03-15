@@ -31,7 +31,21 @@ Router.prototype.callCb = function(route) {
   return route.cb.apply(null, route.match.slice(1));
 };
 
-if (typeof process === 'undefined') {
+if (typeof window === 'undefined') {
+  // We're on the server
+  Router.prototype.route = function(path) {
+    for (var i = 0; i < this._routes.length; ++i) {
+      var route = this._routes[i];
+      if (route.opt.clientOnly) {
+        continue;
+      }
+      var match = route.regex.exec(path);
+      if (match) {
+        return this.callCb({cb: route.cb, match: match});
+      }
+    }
+  };
+} else {
   // We're on the client
   Router.prototype.getRouteForPath = function(path) {
     for (var i = 0; i < this._routes.length; ++i) {
@@ -83,24 +97,10 @@ if (typeof process === 'undefined') {
       window.location.reload();
     }
   };
-} else {
-  // We're on the server
-  Router.prototype.route = function(path) {
-    for (var i = 0; i < this._routes.length; ++i) {
-      var route = this._routes[i];
-      if (route.opt.clientOnly) {
-        continue;
-      }
-      var match = route.regex.exec(path);
-      if (match) {
-        return this.callCb({cb: route.cb, match: match});
-      }
-    }
-  };
 }
 
 function makeRouter(routes, notFound) {
-  return Router(routes, notFound);
+  return new Router(routes, notFound);
 }
 
 module.exports = {
