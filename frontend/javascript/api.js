@@ -9,6 +9,11 @@ function handleErrors(callback) {
     if (res.body.error) {
       return callback(res.body.error, res);
     }
+    // Ensure that no non-success results masquarade as successes
+    if (res.status !== 200) {
+      return callback('Sorry, we encountered an unknown error (code ' +
+        res.status + '), please try again.', res);
+    }
     return callback(error, res);
   };
 }

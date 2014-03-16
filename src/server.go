@@ -95,7 +95,7 @@ func Main() {
 
 	// User routes (see handlers_user.go)
 	m.Get("/api/v1/users/current.json", HandleGetCurrentUser)
-	m.Post("/api/v1/users/twitter.json", binding.Form(models.UserForm{}), HandleCreateUserByTwitter)
+	m.Post("/api/v1/users/twitter.json", binding.Json(models.UserForm{}), HandleCreateUserByTwitter)
 
 	// Timelines (see handlers_timeline.go)
 	m.Get("/api/v1/timelines/home.json", binding.Form(Limit{}), HandleGetHomeTimeline)

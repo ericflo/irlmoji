@@ -12,7 +12,7 @@ function authed(app, func) {
   if (!app.getUserId()) {
     var Auth = auth.Auth;
     return function() {
-      app.render(<Auth />);
+      app.render(<Auth app={app} />);
     }
   }
   return function() {
@@ -44,8 +44,10 @@ function getRoutes(app) {
 }
 
 function getNotFound(app) {
-  var NotFound = common.NotFound;
-  app.render(<NotFound />, {statusCode: 404});
+  return function() {
+    var NotFound = common.NotFound;
+    app.render(<NotFound />, {statusCode: 404});
+  };
 }
 
 module.exports = {

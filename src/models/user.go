@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/codegangsta/martini-contrib/binding"
@@ -99,7 +100,7 @@ func (db *DB) CreateUser(id, username, twitterAccessToken, twitterAccessSecret s
 
 	if id != "" {
 		tmpUser, tmpErr := db.GetUserWithId(id)
-		if tmpErr != nil {
+		if tmpErr != nil && tmpErr != sql.ErrNoRows {
 			return nil, tmpErr
 		}
 		if tmpUser != nil {
@@ -109,7 +110,7 @@ func (db *DB) CreateUser(id, username, twitterAccessToken, twitterAccessSecret s
 	}
 	if username != "" {
 		tmpUser, tmpErr := db.GetUserWithUsername(username)
-		if tmpErr != nil {
+		if tmpErr != nil && tmpErr != sql.ErrNoRows {
 			return nil, tmpErr
 		}
 		if tmpUser != nil {

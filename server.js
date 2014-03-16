@@ -132,7 +132,6 @@ function twitterAuthHandler(req, res, next) {
         authPassword: (req.session.uid || 0) + '_' + req.session.gid
       });
       api.createUserByTwitter(oauthAccessToken, oauthAccessTokenSecret, _.bind(function(error, resp) {
-        console.log(resp.body);
         if (error) {
           // TODO: What should we really do here? Show it again with an error?
           res.writeHead(500, {'Content-Type': 'text/html'});

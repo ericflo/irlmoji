@@ -39,7 +39,7 @@ func HandleCreateUserByTwitter(r render.Render, bindErr binding.Errors, userForm
 	client := twittergo.NewClient(config, oauthUser)
 
 	// Build request to send to Twitter
-	req, err := http.NewRequest("GET", "/1.1/account/verify_credentials", nil)
+	req, err := http.NewRequest("GET", "/1.1/account/verify_credentials.json", nil)
 	if err != nil {
 		log.Println("Could not build request for Twitter:", err.Error())
 		r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
