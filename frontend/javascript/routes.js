@@ -9,15 +9,12 @@ var auth = require('./components/auth');
 // Wrappers for the handlers, whether you need auth or not
 
 function authed(app, func) {
-  if (!app.getUserId()) {
-    var Auth = auth.Auth;
-    return function() {
-      app.render(<Auth app={app} />);
+  return _.partial(app.api.getCurrentUser, function(err, res) {
+    if (!res.body.user) {
+      return handleAuth(app);
     }
-  }
-  return function() {
-    return _.partial(func, app).apply(null, arguments);
-  };
+    return _.partial(func, app, res.body.user).apply(null, arguments);
+  });
 }
 
 function unauthed(app, func) {
@@ -28,10 +25,16 @@ function unauthed(app, func) {
 
 // The handlers themselves
 
-function handleIndex(app) {
-  app.api.getCurrentUser(function(err, res) {
-    app.render(<p>You are logged in! ({res.body.user.username})</p>);
-  });
+function handleAuth(app) {
+  function handleLogin(user) {
+    app.reload();
+  }
+  var Auth = auth.Auth;
+  app.render(<Auth app={app} onLogin={handleLogin} />);
+}
+
+function handleIndex(app, user) {
+  app.render(<p>You are logged in! ({user.username}) <a href="/logout">Logout</a></p>);
 }
 
 // Generates the routes and binds function partials

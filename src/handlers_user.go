@@ -12,7 +12,7 @@ import (
 
 func HandleGetCurrentUser(r render.Render, backchannel Backchannel, db *models.DB) {
 	if backchannel.UserId() == "" {
-		r.JSON(403, JsonErr("You must be authed to access this resource."))
+		r.JSON(200, map[string]*models.User{"user": nil})
 		return
 	}
 	if user, err := db.GetUserWithId(backchannel.UserId()); err == nil {
@@ -64,8 +64,14 @@ func HandleCreateUserByTwitter(r render.Render, bindErr binding.Errors, userForm
 		return
 	}
 
+	user, err := db.GetUserWithId(result.IdStr())
+	if err == nil {
+		r.JSON(200, map[string]*models.User{"user": user})
+		return
+	}
+
 	// Now let's create that user, shall we?
-	user, err := db.CreateUser(
+	user, err = db.CreateUser(
 		result.IdStr(),
 		result.ScreenName(),
 		userForm.TwitterAccessToken,

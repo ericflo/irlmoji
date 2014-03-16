@@ -66,7 +66,7 @@ gulp.task('watch', ['clean'], function() {
       gulp.watch('frontend/**/*.less', ['styles']);
       nodemon({
         script: 'server.js',
-        watch: ['build/javascript/compiled.js', 'server.js', 'gulpfile.js', 'env.json']
+        watch: 'build'
       });
     }
   });

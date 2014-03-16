@@ -10,7 +10,7 @@ window.React = React;
 window._ = _;
 
 var api = apiBuilder.setupApi({
-  urlBase: '/api',
+  urlBase: '',
   csrf: document.getElementById('csrftoken').value
 });
 
@@ -36,6 +36,12 @@ var app = {
   },
   getPath: function() {
     return window.location.pathname + window.location.search;
+  },
+  go: function(path) {
+    return router.go(path);
+  },
+  reload: function() {
+    return router.go(this.getPath());
   }
 };
 
