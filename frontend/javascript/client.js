@@ -36,20 +36,14 @@ var app = {
   },
   getPath: function() {
     return window.location.pathname + window.location.search;
-  },
-  go: function(path) {
-    return router.go(path);
-  },
-  reload: function() {
-    return router.go(this.getPath());
   }
 };
 
-var router = makeRouter(
+app.router = makeRouter(
   routes.getRoutes(app),
   routes.getNotFound(app)
 );
 
 window.app = app;
 
-router.start();
+app.router.start();

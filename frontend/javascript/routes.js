@@ -27,7 +27,7 @@ function unauthed(app, func) {
 
 function handleAuth(app) {
   function handleLogin(user) {
-    app.reload();
+    app.router.reload();
   }
   var Auth = auth.Auth;
   app.render(<Auth app={app} onLogin={handleLogin} />);
