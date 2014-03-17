@@ -9,9 +9,9 @@ var Capture = React.createClass({
     if (window.NProgress) {
       window.NProgress.done();
     }
-    this.props.onPostImageUpload(ev.uploaded_image);
     var dropzone = this.refs.dropzone.getDOMNode();
     window.Dropzone.forElement(dropzone).removeFile(file);
+    this.props.onPostImageUpload(ev.path);
   },
 
   handleUploadError: function(file, errMsg) {
@@ -47,6 +47,23 @@ var Capture = React.createClass({
                      dictDefaultMessage={'<i class="fa fa-camera-retro"></i>'} />
     )
 
+  }
+
+});
+
+var EmojiPicker = React.createClass({
+
+  handleChange: function(ev) {
+
+  },
+
+  render: function() {
+    return (
+      <div>
+        <a href="#" onClick={this.props.onCancel}>x</a>
+        <input type="text" onChange={this.handleChange} />
+      </div>
+    );
   }
 
 });
@@ -94,5 +111,6 @@ var ReactDropzone = React.createClass({
 });
 
 module.exports = {
+  EmojiPicker: EmojiPicker,
   Capture: Capture
 };
