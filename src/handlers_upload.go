@@ -18,9 +18,10 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"path/filepath"
 )
 
-var THUMBNAIL_SIZES []int = []int{1000, 500, 200, 100, 50}
+var THUMBNAIL_SIZES []int = []int{1000, 500, 100}
 
 func generateThumbnails(file multipart.File, userId, pathPrefix string, bucket *s3.Bucket) error {
 	file.Seek(0, 0)
@@ -68,10 +69,16 @@ func HandleUpload(r render.Render, w http.ResponseWriter, req *http.Request, bac
 	bucket := s.Bucket(AWS_S3_BUCKET_NAME)
 	mimetype := header.Header.Get("Content-Type")
 	imageId := uuid.New()
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		fmt.Fprintln(w,
+			"Could not determine the file type of the uploaded image.")
+		return
+	}
 
 	// Upload the original
-	path := fmt.Sprintf("uploads/original/%s/%s/%s", backchannel.UserId(),
-		imageId, header.Filename)
+	path := fmt.Sprintf("uploads/original/%s/%s%s", backchannel.UserId(),
+		imageId, ext)
 	err = bucket.Put(path, data, mimetype, s3.PublicRead)
 	if err != nil {
 		fmt.Fprintln(w, err)
