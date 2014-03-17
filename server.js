@@ -178,6 +178,7 @@ function reactHandler(req, res, next) {
       EXTRA_HEAD: opts.extraHead || '',
       BODY_CLASS: opts.bodyClass || '',
       BODY_CONTENT: React.renderComponentToString(reactElt),
+      DATA_BOOTSTRAP: JSON.stringify(opts.bootstrap || ''),
       USER_ID: req.session.uid || 'null',
       CSRF_TOKEN: req.csrfToken(),
       SCRIPT_PATH: '/' + scriptPath + '?v=' + scriptVersion,

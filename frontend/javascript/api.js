@@ -1,46 +1,6 @@
 var request = require('superagent');
 var _ = require('lodash/dist/lodash.underscore');
 
-function handleErrors(callback) {
-  return function(error, res) {
-    if (error) {
-      return callback(error, res);
-    }
-    if (res.body.error) {
-      return callback(res.body.error, res);
-    }
-    // Ensure that no non-success results masquarade as successes
-    if (res.status !== 200) {
-      return callback('Sorry, we encountered an unknown error (code ' +
-        res.status + '), please try again.', res);
-    }
-    return callback(error, res);
-  };
-}
-
-function parseTimes(item) {
-  _.each(['timeCreated', 'timeUpdated'], function(key) {
-    if (item[key]) {
-      item[key] = new Date(item[key]);
-    }
-  });
-  return item;
-}
-
-function parseResponse(callback) {
-  return function(error, res) {
-    if (error) {
-      return callback(error, res);
-    }
-    if (res.body.user) {
-      parseTimes(res.body.user);
-    } else if (res.body.timeline) {
-      _.each(res.body.timeline, parseTimes);
-    }
-    return callback(error, res);
-  };
-}
-
 function setupApi(opts) {
   var urlBase = opts.urlBase;
   var csrf = opts.csrf || null;
@@ -90,6 +50,46 @@ function setupApi(opts) {
     createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
     getUserTimeline: getUserTimeline
+  };
+}
+
+function handleErrors(callback) {
+  return function(error, res) {
+    if (error) {
+      return callback(error, res);
+    }
+    if (res.body.error) {
+      return callback(res.body.error, res);
+    }
+    // Ensure that no non-success results masquarade as successes
+    if (res.status !== 200) {
+      return callback('Sorry, we encountered an unknown error (code ' +
+        res.status + '), please try again.', res);
+    }
+    return callback(error, res);
+  };
+}
+
+function parseTimes(item) {
+  _.each(['timeCreated', 'timeUpdated'], function(key) {
+    if (item[key]) {
+      item[key] = new Date(item[key]);
+    }
+  });
+  return item;
+}
+
+function parseResponse(callback) {
+  return function(error, res) {
+    if (error) {
+      return callback(error, res);
+    }
+    if (res.body.user) {
+      parseTimes(res.body.user);
+    } else if (res.body.timeline) {
+      _.each(res.body.timeline, parseTimes);
+    }
+    return callback(error, res);
   };
 }
 

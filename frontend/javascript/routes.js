@@ -6,26 +6,6 @@ var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
 
-// Wrappers for the handlers, whether you need auth or not
-
-function authed(app, func) {
-  return _.partial(app.api.getCurrentUser, function(err, res) {
-    if (err) {
-      return handleServerError(app);
-    }
-    if (!res.body.user) {
-      return handleAuth(app);
-    }
-    return _.partial(func, app, res.body.user).apply(null, arguments);
-  });
-}
-
-function unauthed(app, func) {
-  return function() {
-    return _.partial(func, app).apply(null, arguments);
-  };
-}
-
 // Utility handlers for things like not found pages, server errors, and auth
 
 function handleNotFound(app) {
@@ -49,20 +29,49 @@ function handleAuth(app) {
 // The handlers themselves
 
 function handleIndex(app, user) {
-  app.render(<p>You are logged in! ({user.username}) <a href="/logout">Logout</a></p>);
+  var handleClick = function(ev) {
+    app.router.go('/');
+    return false;
+  };
+  app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={handleClick}>Home</a> <a href="/logout">Logout</a></p>);
 }
 
 // Generates the routes and binds function partials
 
 function getRoutes(app) {
   return [
-    ['/', authed(app, handleIndex)]
-    //['/:username', requireAuth(userProfile)]
+    ['/', prepareHandler(app, handleIndex, true)]
+    //['/:username', prepareHandler(userProfile)]
   ]
 }
 
 function getNotFound(app) {
   return _.partial(handleNotFound, app);
+}
+
+// Wrappers for the handlers to prepare them with app instances and user auth
+
+function prepareHandler(app, func, authRequired) {
+  if (!authRequired) {
+    return function() {
+      if (!app.isServer()) {
+        app.loadingBegan();
+      }
+      return _.partial(func, app).apply(null, arguments);
+    }
+  }
+  return _.partial(app.api.getCurrentUser, function(err, res) {
+    if (!app.isServer()) {
+      app.loadingBegan();
+    }
+    if (err) {
+      return handleServerError(app);
+    }
+    if (!res.body.user) {
+      return handleAuth(app);
+    }
+    return _.partial(func, app, res.body.user).apply(null, arguments);
+  });
 }
 
 module.exports = {

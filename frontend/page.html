@@ -9,9 +9,15 @@
   <meta content="yes" name="apple-mobile-web-app-capable">
   <title>{{ PAGE_TITLE }}</title>
   <script>window.userId = {{ USER_ID }};</script>
+  <script>window.dataBootstrap = {{ DATA_BOOTSTRAP }};</script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-shim.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/2.2.0/es5-sham.min.js"></script>
+  <!-- Scripts required for NProgress -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/nprogress/0.1.2/nprogress.min.js"></script>
+  <!-- End NProgress section -->
   {{ EXTRA_HEAD }}
+  <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
   <link href="{{ STYLE_PATH }}" rel="stylesheet" media="screen">
 </head>
 <body class="{{ BODY_CLASS }}">

@@ -9,6 +9,8 @@ var apiBuilder = require('./api');
 window.React = React;
 window._ = _;
 
+window.BOOTSTRAPPING = true;
+
 var api = apiBuilder.setupApi({
   urlBase: '',
   csrf: document.getElementById('csrftoken').value
@@ -20,6 +22,7 @@ function render(reactElt, opts) {
   document.body.setAttribute('class', opts.bodyClass || '');
   document.title = opts.pageTitle || 'IRLMoji';
   window.currentPage = React.renderComponent(reactElt, elt);
+  app.loadingEnded();
 }
 
 var app = {
@@ -36,6 +39,17 @@ var app = {
   },
   getPath: function() {
     return window.location.pathname + window.location.search;
+  },
+  loadingBegan: function() {
+    if (window.NProgress && !window.BOOTSTRAPPING) {
+      NProgress.start();
+    }
+  },
+  loadingEnded: function() {
+    if (window.NProgress) {
+      NProgress.done();
+    }
+    window.BOOTSTRAPPING = false;
   }
 };
 
