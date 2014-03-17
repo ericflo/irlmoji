@@ -6,7 +6,7 @@ var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
 
-// Utility handlers for things like not found pages, server errors, and auth
+// Basic handlers for things like not found pages, server errors, and auth
 
 function handleNotFound(app) {
   var NotFound = common.NotFound;
@@ -19,21 +19,19 @@ function handleServerError(app) {
 }
 
 function handleAuth(app) {
-  function handleLogin(user) {
-    app.router.reload();
-  }
   var Auth = auth.Auth;
-  app.render(<Auth app={app} onLogin={handleLogin} />);
+  app.render(<Auth app={app} onLogin={function(user) {
+    app.router.reload();
+  }} />);
 }
 
 // The handlers themselves
 
 function handleIndex(app, user) {
-  var handleClick = function(ev) {
+  app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={function(ev) {
     app.router.go('/');
     return false;
-  };
-  app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={handleClick}>Home</a> <a href="/logout">Logout</a></p>);
+  }}>Home</a> <a href="/logout">Logout</a></p>);
 }
 
 // Generates the routes and binds function partials
