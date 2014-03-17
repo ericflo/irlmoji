@@ -5,6 +5,7 @@ var React = require('react/addons');
 var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
+var timeline = require('./components/timeline');
 
 // Basic handlers for things like not found pages, server errors, and auth
 
@@ -42,10 +43,8 @@ function handleIndex(app, user) {
     if (err) {
       return handleServerError(app);
     }
-    app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={function(ev) {
-      app.router.go('/');
-      return false;
-    }}>Home</a> <a href="/logout">Logout</a></p>, {
+    var Timeline = timeline.Timeline;
+    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
       title: 'Welcome : IRLMoji',
       user: user,
       data: data
