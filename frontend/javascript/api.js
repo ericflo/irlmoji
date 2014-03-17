@@ -45,11 +45,16 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
+  function getCSRF() {
+    return csrf;
+  }
+
   return {
     getCurrentUser: getCurrentUser,
     createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
-    getUserTimeline: getUserTimeline
+    getUserTimeline: getUserTimeline,
+    getCSRF: getCSRF
   };
 }
 

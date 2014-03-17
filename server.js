@@ -78,7 +78,9 @@ function guestHandler(req, res, next) {
 }
 
 function apiProxyHandler(req, res, next) {
-  if (req.url.indexOf('/api') !== 0) {
+  var isApi = req.url.indexOf('/api') === 0;
+  var isUpload = req.url.indexOf('/upload') === 0;
+  if (!isApi && !isUpload) {
     return next();
   }
   var uid = req.session.uid || 0;

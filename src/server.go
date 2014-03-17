@@ -7,6 +7,7 @@ import (
 	"github.com/codegangsta/martini-contrib/render"
 	"github.com/ericflo/irlmoji/src/models"
 	_ "github.com/lib/pq"
+	"launchpad.net/goamz/aws"
 	"log"
 	"net/http"
 	"os"
@@ -18,12 +19,16 @@ var IRLMOJI_API_BASIC_USER string
 var IRLMOJI_DBURI string
 var TWITTER_CONSUMER_KEY string
 var TWITTER_CONSUMER_SECRET string
+var AWS_S3_BUCKET_NAME string
+
+var AWS_AUTH aws.Auth
 
 func readEnv() {
 	IRLMOJI_API_BASIC_USER = os.Getenv("IRLMOJI_API_BASIC_USER")
 	IRLMOJI_DBURI = os.Getenv("IRLMOJI_DBURI")
 	TWITTER_CONSUMER_KEY = os.Getenv("TWITTER_CONSUMER_KEY")
 	TWITTER_CONSUMER_SECRET = os.Getenv("TWITTER_CONSUMER_SECRET")
+	AWS_S3_BUCKET_NAME = os.Getenv("AWS_S3_BUCKET_NAME")
 }
 
 func createAllTables(db *models.DB) error {
@@ -69,6 +74,13 @@ func Main() {
 	// Read in any environment variables we care about
 	readEnv()
 
+	var err error
+
+	AWS_AUTH, err = aws.EnvAuth()
+	if err != nil {
+		panic(err.Error())
+	}
+
 	// Open database connection
 	db, err := models.OpenDB("postgres", IRLMOJI_DBURI)
 	if err != nil {
@@ -100,6 +112,8 @@ func Main() {
 	// Timelines (see handlers_timeline.go)
 	m.Get("/api/v1/timelines/home.json", binding.Form(Limit{}), HandleGetHomeTimeline)
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
+
+	m.Post("/upload", HandleUpload)
 
 	m.NotFound(HandleNotFound)
 
