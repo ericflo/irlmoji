@@ -17,7 +17,7 @@ function setupApi(opts) {
   function getCurrentUser(callback) {
     authed(request.get(urlBase + '/api/v1/users/current.json'))
       .set('Accept', 'application/json')
-      .end(parseResponse(handleErrors(callback)));
+      .end(parseResponse(callback));
   }
 
   function createUserByTwitter(accessToken, accessSecret, callback) {
@@ -29,20 +29,20 @@ function setupApi(opts) {
       })
       .set('Accept', 'application/json')
       .set('X-CSRF-Token', csrf)
-      .end(parseResponse(handleErrors(callback)));
+      .end(parseResponse(callback));
   }
 
   function getHomeTimeline(callback) {
     authed(request.get(urlBase + '/api/v1/timelines/home.json'))
       .set('Accept', 'application/json')
-      .end(parseResponse(handleErrors(callback)));
+      .end(parseResponse(callback));
   }
 
   function getUserTimeline(username, callback) {
     var url = urlBase + '/api/v1/timelines/user/username/' + username + '.json';
     authed(request.get(url))
       .set('Accept', 'application/json')
-      .end(parseResponse(handleErrors(callback)));
+      .end(parseResponse(callback));
   }
 
   return {
@@ -50,23 +50,6 @@ function setupApi(opts) {
     createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
     getUserTimeline: getUserTimeline
-  };
-}
-
-function handleErrors(callback) {
-  return function(error, res) {
-    if (error) {
-      return callback(error, res);
-    }
-    if (res.body.error) {
-      return callback(res.body.error, res);
-    }
-    // Ensure that no non-success results masquarade as successes
-    if (res.status !== 200) {
-      return callback('Sorry, we encountered an unknown error (code ' +
-        res.status + '), please try again.', res);
-    }
-    return callback(error, res);
   };
 }
 
@@ -81,15 +64,31 @@ function parseTimes(item) {
 
 function parseResponse(callback) {
   return function(error, res) {
+    // First, handle any errors
     if (error) {
       return callback(error, res);
     }
-    if (res.body.user) {
-      parseTimes(res.body.user);
-    } else if (res.body.timeline) {
-      _.each(res.body.timeline, parseTimes);
+    if (res.body ? res.body.error : res.error) {
+      return callback(res.body ? res.body.error : res.error, res);
     }
-    return callback(error, res);
+    // Ensure that no non-success results masquarade as successes
+    if (res.status !== 200) {
+      return callback('Sorry, we encountered an unknown error (code ' +
+        res.status + '), please try again.', res);
+    }
+
+    // Now parse the data
+    var data = {};
+    if (res.body.error) {
+      data.error = res.body.error;
+    }
+    if (res.body.user) {
+      data.user = parseTimes(res.body.user);
+    }
+    if (res.body.timeline) {
+      data.timeline = _.each(res.body.timeline, parseTimes);
+    }
+    return callback(error, data);
   };
 }
 

@@ -14,13 +14,13 @@ var Auth = React.createClass({
       alert('Sorry, there was an error logging you in, try again soon!');
       return;
     }
-    if (!res.body || !res.body.user) {
+    if (!res.user) {
       // TODO: Decide how best to present this error to the user
       alert('Sorry, something went wrong and we couldn\'t log you in. ' +
         'Please try again soon.');
       return;
     }
-    this.props.onLogin(res.body.user);
+    this.props.onLogin(res.user);
   },
 
   handleTwitterClick: function(ev) {

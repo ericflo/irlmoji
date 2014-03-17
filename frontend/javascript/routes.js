@@ -25,13 +25,32 @@ function handleAuth(app) {
   }} />);
 }
 
+// Utilities
+
+function cachedFetch(funcs, callback) {
+  if (typeof window !== 'undefined' && window.BOOTSTRAPPING &&
+      window.bootstrapData) {
+    return callback(null, window.bootstrapData);
+  }
+  return async.parallel(funcs, callback);
+}
+
 // The handlers themselves
 
 function handleIndex(app, user) {
-  app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={function(ev) {
-    app.router.go('/');
-    return false;
-  }}>Home</a> <a href="/logout">Logout</a></p>);
+  cachedFetch({timeline: app.api.getHomeTimeline}, function(err, data) {
+    if (err) {
+      return handleServerError(app);
+    }
+    app.render(<p>You are logged in! ({user.username}) <a href="/" onClick={function(ev) {
+      app.router.go('/');
+      return false;
+    }}>Home</a> <a href="/logout">Logout</a></p>, {
+      title: 'Welcome : IRLMoji',
+      user: user,
+      data: data
+    });
+  });
 }
 
 // Generates the routes and binds function partials
@@ -47,29 +66,50 @@ function getNotFound(app) {
   return _.partial(handleNotFound, app);
 }
 
-// Wrappers for the handlers to prepare them with app instances and user auth
+// Wrappers for the handlers to prepare them with app instances, auth, and loaders
 
-function prepareHandler(app, func, authRequired) {
-  if (!authRequired) {
-    return function() {
-      if (!app.isServer()) {
-        app.loadingBegan();
-      }
-      return _.partial(func, app).apply(null, arguments);
-    }
+function loadingBegan(app) {
+  if (!app.isServer()) {
+    app.loadingBegan();
   }
+}
+
+function makeAuthlessHandler(app, func) {
+  return function() {
+    loadingBegan(app);
+    return _.partial(func, app).apply(null, arguments);
+  };
+}
+
+function makeBootstrapHandler(app, func) {
+  return function() {
+    loadingBegan(app);
+    return _.partial(func, app, window.bootstrapUser).apply(null, arguments);
+  };
+}
+
+function makeAuthedHandler(app, func) {
   return _.partial(app.api.getCurrentUser, function(err, res) {
-    if (!app.isServer()) {
-      app.loadingBegan();
-    }
+    loadingBegan(app);
     if (err) {
       return handleServerError(app);
     }
-    if (!res.body.user) {
+    if (!res.user) {
       return handleAuth(app);
     }
-    return _.partial(func, app, res.body.user).apply(null, arguments);
+    return _.partial(func, app, res.user).apply(null, arguments);
   });
+}
+
+function prepareHandler(app, func, authRequired) {
+  if (!authRequired) {
+    return makeAuthlessHandler(app, func);
+  }
+  if (typeof window !== 'undefined' && window.BOOTSTRAPPING &&
+    window.bootstrapUser) {
+    return makeBootstrapHandler(app, func);
+  }
+  return makeAuthedHandler(app, func);
 }
 
 module.exports = {

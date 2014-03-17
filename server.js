@@ -137,7 +137,7 @@ function twitterAuthHandler(req, res, next) {
           res.writeHead(500, {'Content-Type': 'text/html'});
           return res.end('<script>window.close()</script>');
         }
-        req.session.uid = resp.body.user.id;
+        req.session.uid = resp.user.id;
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end('<script>window.close()</script>');
       }, this));
@@ -178,7 +178,8 @@ function reactHandler(req, res, next) {
       EXTRA_HEAD: opts.extraHead || '',
       BODY_CLASS: opts.bodyClass || '',
       BODY_CONTENT: React.renderComponentToString(reactElt),
-      DATA_BOOTSTRAP: JSON.stringify(opts.bootstrap || ''),
+      BOOTSTRAP_DATA: JSON.stringify(opts.data || null),
+      BOOTSTRAP_USER: JSON.stringify(opts.user || null),
       USER_ID: req.session.uid || 'null',
       CSRF_TOKEN: req.csrfToken(),
       SCRIPT_PATH: '/' + scriptPath + '?v=' + scriptVersion,
