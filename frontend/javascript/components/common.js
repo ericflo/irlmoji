@@ -30,7 +30,14 @@ var NotFound = React.createClass({
   }
 });
 
+var ServerError = React.createClass({
+  render: function() {
+    return <p>Sorry, there was an internal server error.</p>;
+  }
+})
+
 module.exports = {
   SetIntervalMixin: SetIntervalMixin,
-  NotFound: NotFound
+  NotFound: NotFound,
+  ServerError: ServerError
 };

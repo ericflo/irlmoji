@@ -18,6 +18,29 @@ function handleErrors(callback) {
   };
 }
 
+function parseTimes(item) {
+  _.each(['timeCreated', 'timeUpdated'], function(key) {
+    if (item[key]) {
+      item[key] = new Date(item[key]);
+    }
+  });
+  return item;
+}
+
+function parseResponse(callback) {
+  return function(error, res) {
+    if (error) {
+      return callback(error, res);
+    }
+    if (res.body.user) {
+      parseTimes(res.body.user);
+    } else if (res.body.timeline) {
+      _.each(res.body.timeline, parseTimes);
+    }
+    return callback(error, res);
+  };
+}
+
 function setupApi(opts) {
   var urlBase = opts.urlBase;
   var csrf = opts.csrf || null;
@@ -34,7 +57,7 @@ function setupApi(opts) {
   function getCurrentUser(callback) {
     authed(request.get(urlBase + '/api/v1/users/current.json'))
       .set('Accept', 'application/json')
-      .end(handleErrors(callback));
+      .end(parseResponse(handleErrors(callback)));
   }
 
   function createUserByTwitter(accessToken, accessSecret, callback) {
@@ -46,20 +69,20 @@ function setupApi(opts) {
       })
       .set('Accept', 'application/json')
       .set('X-CSRF-Token', csrf)
-      .end(handleErrors(callback));
+      .end(parseResponse(handleErrors(callback)));
   }
 
   function getHomeTimeline(callback) {
     authed(request.get(urlBase + '/api/v1/timelines/home.json'))
       .set('Accept', 'application/json')
-      .end(handleErrors(callback));
+      .end(parseResponse(handleErrors(callback)));
   }
 
   function getUserTimeline(username, callback) {
     var url = urlBase + '/api/v1/timelines/user/username/' + username + '.json';
     authed(request.get(url))
       .set('Accept', 'application/json')
-      .end(handleErrors(callback));
+      .end(parseResponse(handleErrors(callback)));
   }
 
   return {

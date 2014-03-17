@@ -10,6 +10,9 @@ var auth = require('./components/auth');
 
 function authed(app, func) {
   return _.partial(app.api.getCurrentUser, function(err, res) {
+    if (err) {
+      return handleServerError(app);
+    }
     if (!res.body.user) {
       return handleAuth(app);
     }
@@ -23,7 +26,17 @@ function unauthed(app, func) {
   };
 }
 
-// The handlers themselves
+// Utility handlers for things like not found pages, server errors, and auth
+
+function handleNotFound(app) {
+  var NotFound = common.NotFound;
+  app.render(<NotFound />, {statusCode: 404});
+}
+
+function handleServerError(app) {
+  var ServerError = common.ServerError;
+  app.render(<ServerError />, {statusCode: 500});
+}
 
 function handleAuth(app) {
   function handleLogin(user) {
@@ -32,6 +45,8 @@ function handleAuth(app) {
   var Auth = auth.Auth;
   app.render(<Auth app={app} onLogin={handleLogin} />);
 }
+
+// The handlers themselves
 
 function handleIndex(app, user) {
   app.render(<p>You are logged in! ({user.username}) <a href="/logout">Logout</a></p>);
@@ -47,10 +62,7 @@ function getRoutes(app) {
 }
 
 function getNotFound(app) {
-  return function() {
-    var NotFound = common.NotFound;
-    app.render(<NotFound />, {statusCode: 404});
-  };
+  return _.partial(handleNotFound, app);
 }
 
 module.exports = {
