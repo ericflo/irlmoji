@@ -2,6 +2,7 @@
 
 var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
+var emoji = require('../emoji');
 
 var Capture = React.createClass({
 
@@ -45,23 +46,98 @@ var Capture = React.createClass({
                      error={this.handleUploadError}
                      sending={this.handleUploadSending}
                      dictDefaultMessage={'<i class="fa fa-camera-retro"></i>'} />
-    )
+    );
 
+  }
+
+});
+
+var Emoji = React.createClass({
+
+  getReplaceMode: function() {
+    /*
+    var ua = this.props.userAgent;
+    if (ua.match(/(iPhone|iPod|iPad|iPhone\s+Simulator)/i)) {
+      if (ua.match(/OS\s+[12345]/i)) {
+        return 'softbank';
+      }
+      if (ua.match(/OS\s+[6789]/i)) {
+        return 'unified';
+      }
+    }
+    if (ua.match(/Mac OS X 10[._ ][789]/i)) {
+      if (!ua.match(/Chrome/i)) {
+        return 'unified';
+      }
+    }
+    */
+  },
+
+  render: function() {
+    var mode = this.getReplaceMode();
+    if (mode === 'unified') {
+      return <span className="emoji">{emoji.EMOJI_DATA[this.props.emoji][0]}</span>;
+    } else if (mode === 'softbank') {
+      return <span className="emoji">{emoji.EMOJI_DATA[this.props.emoji][1]}</span>;
+    } else if (mode === 'google') {
+      return <span className="emoji">{emoji.EMOJI_DATA[this.props.emoji][2]}</span>;
+    }
+    return (
+      <img className="emoji"
+           src={'/images/emoji/' + this.props.emoji + '.png'}
+           title={this.props.emoji} />
+    );
   }
 
 });
 
 var EmojiPicker = React.createClass({
 
-  handleChange: function(ev) {
+  getInitialState: function() {
+    return {entry: ''};
+  },
 
+  handleChange: function(ev) {
+    this.setState({entry: ev.target.value});
+  },
+
+  getEmoji: function() {
+    var resp = [];
+    if (this.state.entry.length === 0) {
+      return [];
+    }
+    _.each(emoji.EMOJI_DATA, function(row, key) {
+      if (resp.length > 20) {
+        // That's enough, let's just bail
+        return;
+      }
+      for (var i = 0; i < row[3].length; ++i) {
+        var name = row[3][i];
+        if (name.indexOf(this.state.entry.toLowerCase()) !== -1) {
+          resp.push(key);
+          break;
+        }
+      }
+    }, this);
+    return resp;
   },
 
   render: function() {
+    var userAgent = this.props.app.getUserAgent();
     return (
       <div>
         <a href="#" onClick={this.props.onCancel}>x</a>
         <input type="text" onChange={this.handleChange} />
+        <ul className="emoji-list">
+        {_.map(this.getEmoji(), function(key) {
+          return (
+            <li onClick={_.partial(this.props.onChoice, key)}>
+              <Emoji key={key} emoji={key} userAgent={userAgent} />
+              {' :' + emoji.EMOJI_DATA[key][3][0] + ':'}
+            </li>
+          );
+        }, this)}
+        </ul>
       </div>
     );
   }

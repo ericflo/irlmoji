@@ -210,8 +210,11 @@ function reactHandler(req, res, next) {
     },
     getPath: function() {
       return req.url;
+    },
+    getUserAgent: function() {
+      return req.headers['user-agent'] || '';
     }
-  }
+  };
 
   var router = makeRouter(
     routes.getRoutes(app),

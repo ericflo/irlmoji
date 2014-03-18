@@ -7,7 +7,7 @@ var capture = require('./capture');
 var Timeline = React.createClass({
 
   getInitialState: function() {
-    return {imagePath: null};
+    return {imagePath: 'uploads/original/14087951/a0022e89-e0d4-49bd-81fd-f6d774446a0f.jpg'};
   },
 
   handleClick: function(ev) {
@@ -19,8 +19,9 @@ var Timeline = React.createClass({
     this.setState({imagePath: path});
   },
 
-  handleEmojiChoice: function(emoji) {
+  handleEmojiChoice: function(emojiKey) {
     // TODO
+    return false;
   },
 
   handleEmojiCancel: function(ev) {
