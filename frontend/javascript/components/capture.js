@@ -123,10 +123,20 @@ var EmojiPicker = React.createClass({
   },
 
   render: function() {
-    return (
-      <div>
-        <a href="#" onClick={this.props.onCancel}>x</a>
-        <input type="text" onChange={this.handleChange} />
+    return this.transferPropsTo(
+      <div className="emoji-picker">
+        <div className="toolbar">
+          <button type="button"
+                  className="close"
+                  ariaHidden="true"
+                  onClick={this.props.onCancel}>&times;</button>
+        </div>
+        <div className="form-group">
+          <input type="text"
+                 className="form-control"
+                 placeholder="Which emoji was that pic?"
+                 onChange={this.handleChange} />
+        </div>
         <ul className="emoji-list">
         {_.map(this.getEmoji(), function(key) {
           return (

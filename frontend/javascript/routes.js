@@ -67,7 +67,6 @@ function handleUserProfile(app, user, username) {
 }
 
 function handleTimelineEmoji(app, user, displayEmoji) {
-  console.log(displayEmoji);
   var emojiKey = emoji.keyFromDisplay(displayEmoji);
   var funcs = {timeline: _.partial(app.api.getEmojiTimeline, emojiKey)};
   cachedFetch(funcs, function(error, data) {

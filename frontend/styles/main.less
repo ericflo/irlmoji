@@ -12,7 +12,6 @@
 
 .irlmoji {
     width: 100%;
-    background-color: red;
     position: relative;
     margin-bottom: @margin;
     .clearfix();
@@ -36,6 +35,43 @@
     .picture {
         float: left;
         max-width: 100%;
+    }
+}
+
+.emoji-picker {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    background-color: white;
+
+    .toolbar {
+        .clearfix();
+        .close {
+            font-size: 36px;
+            margin: 10px;
+        }
+    }
+
+    .form-group {
+        padding: 10px;
+    }
+
+    .emoji-list {
+        margin-top: -20px;
+    }
+
+    li {
+        list-style-type: none;
+        list-style-position: outside;
+        border-bottom: 1px solid #eee;
+
+        img {
+            margin: 1em;
+        }
+
+        .emoji {
+            max-width: 2em;
+        }
     }
 }
 

@@ -57,6 +57,13 @@ var Timeline = React.createClass({
     var Capture = capture.Capture;
     var EmojiPicker = capture.EmojiPicker;
     var IRLMoji = irlmoji.IRLMoji;
+    if (this.state.imagePath) {
+      return (
+        <EmojiPicker app={this.props.app}
+                     onCancel={this.handleEmojiCancel}
+                     onChoice={this.handleEmojiChoice} />
+      );
+    }
     return (
       <div>
         <p>You are logged in! ({this.props.user.username})</p>
@@ -72,12 +79,8 @@ var Timeline = React.createClass({
                      onEmojiTap={this.handleEmojiTap} />
           );
         }, this)}
-        {this.state.imagePath ?
-          <EmojiPicker app={this.props.app}
-                       onCancel={this.handleEmojiCancel}
-                       onChoice={this.handleEmojiChoice} /> :
-          <Capture app={this.props.app}
-                   onPostImageUpload={this.handlePostImageUpload} />}
+        <Capture app={this.props.app}
+                 onPostImageUpload={this.handlePostImageUpload} />
       </div>
     );
   }
