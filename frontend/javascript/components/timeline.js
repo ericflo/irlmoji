@@ -34,8 +34,10 @@ var Timeline = React.createClass({
 
   handleEmojiChoice: function(emojiKey) {
     var picture = this.state.imagePath;
-    this.props.app.api.createIRLMoji(emojiKey, picture,
-      this.handleCreateIRLMojiResponse);
+    this.setState({imagePath: null}, _.bind(function() {
+      this.props.app.api.createIRLMoji(emojiKey, picture,
+        this.handleCreateIRLMojiResponse);
+    }, this));
     return false;
   },
 
