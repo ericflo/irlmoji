@@ -9,7 +9,6 @@ import (
 	_ "github.com/lib/pq"
 	"launchpad.net/goamz/aws"
 	"log"
-	"net/http"
 	"os"
 )
 
@@ -45,10 +44,11 @@ type Limit struct {
 	Limit uint32 `form:"limit"`
 }
 
-func (limit Limit) Validate(errors *binding.Errors, req *http.Request) {
-	if limit.Limit == 0 {
-		limit.Limit = DEFAULT_LIMIT
+func (limit Limit) GetLimit() uint32 {
+	if limit.Limit == uint32(0) {
+		return DEFAULT_LIMIT
 	}
+	return limit.Limit
 }
 
 func JsonErr(err string) map[string]string {
@@ -109,9 +109,10 @@ func Main() {
 	m.Get("/api/v1/users/current.json", HandleGetCurrentUser)
 	m.Post("/api/v1/users/twitter.json", binding.Json(models.UserForm{}), HandleCreateUserByTwitter)
 
-	// Timelines (see handlers_timeline.go)
+	// IRLMoji routes (see handlers_irlmoji.go)
 	m.Get("/api/v1/timelines/home.json", binding.Form(Limit{}), HandleGetHomeTimeline)
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
+	m.Post("/api/v1/irlmoji.json", binding.Json(models.IRLMoji{}), HandleCreateIRLMoji)
 
 	m.Post("/upload", HandleUpload)
 

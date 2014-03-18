@@ -45,6 +45,18 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
+  function createIRLMoji(emoji, picture, callback) {
+    authed(request.post(urlBase + '/api/v1/irlmoji.json'))
+      .type('json')
+      .send({
+        emoji: emoji,
+        picture: picture
+      })
+      .set('Accept', 'application/json')
+      .set('X-CSRF-Token', csrf)
+      .end(parseResponse(callback));
+  }
+
   function getCSRF() {
     return csrf;
   }
@@ -54,6 +66,7 @@ function setupApi(opts) {
     createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
     getUserTimeline: getUserTimeline,
+    createIRLMoji: createIRLMoji,
     getCSRF: getCSRF
   };
 }
@@ -91,7 +104,10 @@ function parseResponse(callback) {
       data.user = parseTimes(res.body.user);
     }
     if (res.body.timeline) {
-      data.timeline = _.each(res.body.timeline, parseTimes);
+      data.timeline = _.map(res.body.timeline, parseTimes);
+    }
+    if (res.body.irlmoji) {
+      data.irlmoji = parseTimes(res.body.irlmoji);
     }
     return callback(error, data);
   };

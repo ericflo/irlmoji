@@ -4,9 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/codegangsta/martini-contrib/binding"
 	_ "github.com/lib/pq"
-	"net/http"
 	"time"
 )
 
@@ -38,10 +36,6 @@ func (user *User) CreateTableSQL() string {
 type UserForm struct {
 	TwitterAccessToken  string `json:"twitterAccessToken" binding:"required"`
 	TwitterAccessSecret string `json:"twitterAccessSecret" binding:"required"`
-}
-
-func (userForm UserForm) Validate(errors *binding.Errors, req *http.Request) {
-	// TODO (although I'm not crazy about this API that binding exposes.)
 }
 
 // DATABASE ACCESS STUFF

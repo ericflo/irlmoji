@@ -131,8 +131,8 @@ var EmojiPicker = React.createClass({
         <ul className="emoji-list">
         {_.map(this.getEmoji(), function(key) {
           return (
-            <li onClick={_.partial(this.props.onChoice, key)}>
-              <Emoji key={key} emoji={key} userAgent={userAgent} />
+            <li key={key} onClick={_.partial(this.props.onChoice, key)}>
+              <Emoji emoji={key} userAgent={userAgent} />
               {' :' + emoji.EMOJI_DATA[key][3][0] + ':'}
             </li>
           );
@@ -143,6 +143,10 @@ var EmojiPicker = React.createClass({
   }
 
 });
+
+if (typeof window !== 'undefined') {
+  window.Dropzone.autoDiscover = false;
+}
 
 // Utility class to be able to use the Dropzone.js library in a declarative
 // React-like way.
@@ -156,8 +160,6 @@ var ReactDropzone = React.createClass({
       this.dropzone = {destroy: function() {}};
       return;
     }
-
-    win.Dropzone.autoDiscover = false;
 
     // Pull out any properties passed to the component that Dropzone expects,
     // and pass it to the Dropzone constructor.

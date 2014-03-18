@@ -7,7 +7,7 @@ var capture = require('./capture');
 var Timeline = React.createClass({
 
   getInitialState: function() {
-    return {imagePath: 'uploads/original/14087951/a0022e89-e0d4-49bd-81fd-f6d774446a0f.jpg'};
+    return {imagePath: null};
   },
 
   handleClick: function(ev) {
@@ -19,8 +19,18 @@ var Timeline = React.createClass({
     this.setState({imagePath: path});
   },
 
+  handleCreateIRLMojiResponse: function(error, data) {
+    if (error) {
+      alert(error);
+      return;
+    }
+    this.props.app.router.reload();
+  },
+
   handleEmojiChoice: function(emojiKey) {
-    // TODO
+    var picture = this.state.imagePath;
+    this.props.app.api.createIRLMoji(emojiKey, picture,
+      this.handleCreateIRLMojiResponse);
     return false;
   },
 

@@ -2,9 +2,7 @@ package models
 
 import (
 	"database/sql"
-	"github.com/codegangsta/martini-contrib/binding"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -29,10 +27,6 @@ func (im *IRLMoji) CreateTableSQL() string {
     `
 }
 
-func (im IRLMoji) Validate(errors *binding.Errors, req *http.Request) {
-	// TODO (although I'm not crazy about this API that binding exposes.)
-}
-
 const BASE_QUERY string = `
 SELECT
     I.id,
@@ -47,7 +41,7 @@ SELECT
     U.time_created,
     U.time_updated
 FROM irlmoji I
-LEFT JOIN auth_user U
+LEFT OUTER JOIN auth_user U
 ON (I.user_id = U.id)
 `
 
