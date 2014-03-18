@@ -3,9 +3,16 @@
 var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
 var capture = require('./capture');
+var mixins = require('./mixins');
 var emoji = require('../emoji');
 
 var IRLMoji = React.createClass({
+
+  mixins: [mixins.ScreenDimensionsMixin],
+
+  getScreenDimensionElement: function() {
+    return this.getDOMNode();
+  },
 
   getUserPic: function() {
     return this.props.irlmoji.user.pic.replace('_normal', '');
@@ -15,17 +22,8 @@ var IRLMoji = React.createClass({
     // TODO: This could be more elegant
     var orig = ('//' + process.env.AWS_S3_BUCKET_NAME + '.s3.amazonaws.com/' +
       this.props.irlmoji.picture);
-    if (this.props.screenWidth > 1000) {
-      return orig;
-    }
     var resized = orig.replace('original', 'resized').replace(/\..{1,5}$/, '.jpg');
-    if (this.props.screenWidth > 500) {
-      return resized.replace('.jpg', '/1000.jpg');
-    }
-    if (this.props.screenWidth > 100) {
-      return resized.replace('.jpg', '/500.jpg');
-    }
-    return resized.replace('.jpg', '/100.jpg');
+    return resized.replace('.jpg', '/500.jpg');
   },
 
   render: function() {

@@ -4,12 +4,9 @@ var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
 var capture = require('./capture');
 var irlmoji = require('./irlmoji');
-var mixins = require('./mixins');
 var emoji = require('../emoji');
 
 var Timeline = React.createClass({
-
-  mixins: [mixins.ScreenDimensionsMixin],
 
   getInitialState: function() {
     return {imagePath: null};
@@ -72,16 +69,18 @@ var Timeline = React.createClass({
           <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
           <p className="logout"><a href="/logout">Logout</a></p>
         </div>
-        {_.map(this.props.timeline.timeline, function(im) {
-          return (
-            <IRLMoji key={im.id}
-                     irlmoji={im}
-                     app={this.props.app}
-                     screenWidth={this.state.screenWidth}
-                     screenHeight={this.state.screenHeight}
-                     onEmojiTap={this.handleEmojiTap} />
-          );
-        }, this)}
+        <div className="irlmoji-list">
+          {_.map(this.props.timeline.timeline, function(im) {
+            return (
+              <IRLMoji key={im.id}
+                       irlmoji={im}
+                       app={this.props.app}
+                       screenWidth={this.state.screenWidth}
+                       screenHeight={this.state.screenHeight}
+                       onEmojiTap={this.handleEmojiTap} />
+            );
+          }, this)}
+        </div>
         <Capture app={this.props.app}
                  onPostImageUpload={this.handlePostImageUpload} />
       </div>

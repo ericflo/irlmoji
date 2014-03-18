@@ -3,6 +3,7 @@
 @margin: 20px;
 
 .capture {
+    clear: both;
     text-align: center;
     margin-left: auto;
     margin-right: auto;
@@ -10,8 +11,24 @@
     margin-top: -@margin;
 }
 
+@media only screen and (max-width: 900px) {
+    .irlmoji {
+        width: 100%;
+    }
+}
+@media only screen and (max-width: 9999px) {
+    .irlmoji {
+        max-width: 400px;
+        float: left;
+        margin-right: 10px;
+    }
+}
+
+.irlmoji-list {
+    .clearfix();
+}
+
 .irlmoji {
-    width: 100%;
     position: relative;
     margin-bottom: @margin;
     .clearfix();

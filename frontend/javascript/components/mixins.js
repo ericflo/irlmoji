@@ -9,7 +9,12 @@ var ScreenDimensionsMixin = {
   },
 
   updateDimensions: function() {
-    var w = window;
+    var w;
+    if (this.getScreenDimensionElement) {
+      w = this.getScreenDimensionElement();
+    } else {
+      w = window;
+    }
     var d = document;
     var e = d.documentElement;
     var g = d.getElementsByTagName('body')[0];
