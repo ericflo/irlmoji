@@ -16,6 +16,7 @@ type IRLMoji struct {
 }
 
 func (im *IRLMoji) CreateTableSQL() string {
+	// TODO: Foreign key constraints
 	return `
     CREATE TABLE irlmoji (
         id BIGSERIAL PRIMARY KEY,
