@@ -153,12 +153,12 @@ var EmojiPicker = React.createClass({
 
 });
 
+// Utility class to be able to use the Dropzone.js library in a declarative
+// React-like way.
+
 if (typeof window !== 'undefined') {
   window.Dropzone.autoDiscover = false;
 }
-
-// Utility class to be able to use the Dropzone.js library in a declarative
-// React-like way.
 
 var ReactDropzone = React.createClass({
   componentDidMount: function() {
