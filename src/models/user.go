@@ -11,6 +11,7 @@ import (
 type User struct {
 	Id                  string    `json:"id" binding:"required"`
 	Username            string    `json:"username" binding:"required"`
+	Pic                 string    `json:"pic"`
 	TwitterAccessToken  string    `json:"-" binding:"required"`
 	TwitterAccessSecret string    `json:"-" binding:"required"`
 	TimeCreated         time.Time `json:"timeCreated"`
@@ -22,6 +23,7 @@ func (user *User) CreateTableSQL() string {
     CREATE TABLE auth_user (
         id TEXT PRIMARY KEY,
         username TEXT NOT NULL,
+        pic TEXT NOT NULL,
         twitter_access_token TEXT NOT NULL,
         twitter_access_secret TEXT NOT NULL,
         time_created timestamp NOT NULL,
@@ -52,11 +54,12 @@ func UserRowReturn(err error, user *User) (*User, error) {
 func (db *DB) GetUserWithId(id string) (*User, error) {
 	var user User
 	err := db.SQLDB.QueryRow(`
-        SELECT id, username, twitter_access_token, twitter_access_secret,
+        SELECT id, username, pic, twitter_access_token, twitter_access_secret,
                time_created, time_updated
         FROM auth_user WHERE id = $1`, id).Scan(
 		&user.Id,
 		&user.Username,
+		&user.Pic,
 		&user.TwitterAccessToken,
 		&user.TwitterAccessSecret,
 		&user.TimeCreated,
@@ -68,11 +71,12 @@ func (db *DB) GetUserWithId(id string) (*User, error) {
 func (db *DB) GetUserWithUsername(username string) (*User, error) {
 	var user User
 	err := db.SQLDB.QueryRow(`
-        SELECT id, username, twitter_access_token, twitter_access_secret,
+        SELECT id, username, pic, twitter_access_token, twitter_access_secret,
                time_created, time_updated
         FROM auth_user WHERE UPPER(username) = UPPER($1)`, username).Scan(
 		&user.Id,
 		&user.Username,
+		&user.Pic,
 		&user.TwitterAccessToken,
 		&user.TwitterAccessSecret,
 		&user.TimeCreated,
@@ -81,11 +85,12 @@ func (db *DB) GetUserWithUsername(username string) (*User, error) {
 	return UserRowReturn(err, &user)
 }
 
-func (db *DB) CreateUser(id, username, twitterAccessToken, twitterAccessSecret string) (*User, error) {
+func (db *DB) CreateUser(id, username, pic, twitterAccessToken, twitterAccessSecret string) (*User, error) {
 	t := time.Now().UTC()
 	user := User{
 		Id:                  id,
 		Username:            username,
+		Pic:                 pic,
 		TwitterAccessToken:  twitterAccessToken,
 		TwitterAccessSecret: twitterAccessSecret,
 		TimeCreated:         t,
@@ -116,11 +121,12 @@ func (db *DB) CreateUser(id, username, twitterAccessToken, twitterAccessSecret s
 
 	_, err := db.SQLDB.Exec(`
         INSERT INTO auth_user(
-            id, username, twitter_access_token, twitter_access_secret,
+            id, username, pic, twitter_access_token, twitter_access_secret,
             time_created, time_updated
-        ) VALUES ($1, $2, $3, $4, $5, $6)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		user.Id,
 		user.Username,
+		user.Pic,
 		user.TwitterAccessToken,
 		user.TwitterAccessSecret,
 		user.TimeCreated,

@@ -74,6 +74,7 @@ func HandleCreateUserByTwitter(r render.Render, bindErr binding.Errors, userForm
 	user, err = db.CreateUser(
 		result.IdStr(),
 		result.ScreenName(),
+		(*result)["profile_image_url"].(string),
 		userForm.TwitterAccessToken,
 		userForm.TwitterAccessSecret,
 	)

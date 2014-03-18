@@ -36,6 +36,7 @@ SELECT
     I.time_created,
     U.id,
     U.username,
+    U.pic,
     U.twitter_access_token,
     U.twitter_access_secret,
     U.time_created,
@@ -82,6 +83,7 @@ func ParseIMSQL(rows Scannable) (*IRLMoji, error) {
 		&im.TimeCreated,
 		&im.User.Id,
 		&im.User.Username,
+		&im.User.Pic,
 		&im.User.TwitterAccessToken,
 		&im.User.TwitterAccessSecret,
 		&im.User.TimeCreated,
@@ -106,6 +108,7 @@ func (db *DB) GetIMWithId(id uint64) (*IRLMoji, error) {
 		&im.TimeCreated,
 		&im.User.Id,
 		&im.User.Username,
+		&im.User.Pic,
 		&im.User.TwitterAccessToken,
 		&im.User.TwitterAccessSecret,
 		&im.User.TimeCreated,
@@ -128,10 +131,24 @@ func (db *DB) GetAllIMs(limit uint32) ([]*IRLMoji, error) {
 
 func (db *DB) GetIMsForUser(userId string, limit uint32) ([]*IRLMoji, error) {
 	rows, err := db.SQLDB.Query(BASE_QUERY+`
-        WHERE M.user_id = $1
-        ORDER BY M.time_created DESC
+        WHERE I.user_id = $1
+        ORDER BY I.time_created DESC
         LIMIT $2`,
 		userId,
+		limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return IMRowsReturn(rows)
+}
+
+func (db *DB) GetIMsForEmoji(emoji string, limit uint32) ([]*IRLMoji, error) {
+	rows, err := db.SQLDB.Query(BASE_QUERY+`
+        WHERE I.emoji = $1
+        ORDER BY I.time_created DESC
+        LIMIT $2`,
+		emoji,
 		limit,
 	)
 	if err != nil {

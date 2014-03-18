@@ -5,7 +5,8 @@ var React = require('react/addons');
 var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
-var timeline = require('./components/timeline');
+var Timeline = require('./components/timeline').Timeline;
+var emoji = require('./emoji');
 
 // Basic handlers for things like not found pages, server errors, and auth
 
@@ -39,13 +40,42 @@ function cachedFetch(funcs, callback) {
 // The handlers themselves
 
 function handleIndex(app, user) {
-  cachedFetch({timeline: app.api.getHomeTimeline}, function(err, data) {
-    if (err) {
+  cachedFetch({timeline: app.api.getHomeTimeline}, function(error, data) {
+    if (error) {
       return handleServerError(app);
     }
-    var Timeline = timeline.Timeline;
     app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
       title: 'Welcome : IRLMoji',
+      user: user,
+      data: data
+    });
+  });
+}
+
+function handleUserProfile(app, user, username) {
+  var funcs = {timeline: _.partial(app.api.getUserTimeline, username)};
+  cachedFetch(funcs, function(error, data) {
+    if (error) {
+      return handleServerError(app);
+    }
+    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
+      title: username + ' : IRLMoji',
+      user: user,
+      data: data
+    });
+  });
+}
+
+function handleTimelineEmoji(app, user, displayEmoji) {
+  console.log(displayEmoji);
+  var emojiKey = emoji.keyFromDisplay(displayEmoji);
+  var funcs = {timeline: _.partial(app.api.getEmojiTimeline, emojiKey)};
+  cachedFetch(funcs, function(error, data) {
+    if (error) {
+      return handleServerError(app);
+    }
+    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
+      title: displayEmoji + ' : IRLMoji',
       user: user,
       data: data
     });
@@ -56,8 +86,9 @@ function handleIndex(app, user) {
 
 function getRoutes(app) {
   return [
-    ['/', prepareHandler(app, handleIndex, true)]
-    //['/:username', prepareHandler(userProfile)]
+    ['/', prepareHandler(app, handleIndex, true)],
+    ['/user/:username', prepareHandler(app, handleUserProfile, true)],
+    ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)]
   ]
 }
 
@@ -88,16 +119,19 @@ function makeBootstrapHandler(app, func) {
 }
 
 function makeAuthedHandler(app, func) {
-  return _.partial(app.api.getCurrentUser, function(err, res) {
-    loadingBegan(app);
-    if (err) {
-      return handleServerError(app);
-    }
-    if (!res.user) {
-      return handleAuth(app);
-    }
-    return _.partial(func, app, res.user).apply(null, arguments);
-  });
+  return function() {
+    var args = arguments;
+    app.api.getCurrentUser(function(err, res) {
+      loadingBegan(app);
+      if (err) {
+        return handleServerError(app);
+      }
+      if (!res.user) {
+        return handleAuth(app);
+      }
+      return _.partial(func, app, res.user).apply(null, args);
+    });
+  };
 }
 
 function prepareHandler(app, func, authRequired) {

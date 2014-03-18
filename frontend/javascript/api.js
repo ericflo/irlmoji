@@ -45,6 +45,13 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
+  function getEmojiTimeline(emojiKey, callback) {
+    var url = urlBase + '/api/v1/timelines/emoji/' + emojiKey + '.json';
+    authed(request.get(url))
+      .set('Accept', 'application/json')
+      .end(parseResponse(callback));
+  }
+
   function createIRLMoji(emoji, picture, callback) {
     authed(request.post(urlBase + '/api/v1/irlmoji.json'))
       .type('json')
@@ -66,6 +73,7 @@ function setupApi(opts) {
     createUserByTwitter: createUserByTwitter,
     getHomeTimeline: getHomeTimeline,
     getUserTimeline: getUserTimeline,
+    getEmojiTimeline: getEmojiTimeline,
     createIRLMoji: createIRLMoji,
     getCSRF: getCSRF
   };
@@ -90,7 +98,7 @@ function parseResponse(callback) {
       return callback(res.body ? res.body.error : res.error, res);
     }
     // Ensure that no non-success results masquarade as successes
-    if (res.status !== 200) {
+    if (res.status !== 200 || !res.body) {
       return callback('Sorry, we encountered an unknown error (code ' +
         res.status + '), please try again.', res);
     }

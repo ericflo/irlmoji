@@ -32,6 +32,16 @@ func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, 
 	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
 }
 
+func HandleGetEmojiTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB) {
+	timeline, err := db.GetIMsForEmoji(params["emoji"], limit.GetLimit())
+	if err != nil {
+		log.Println("Error getting IMs for emoji", params["emoji"], err.Error())
+		r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
+		return
+	}
+	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
+}
+
 func HandleCreateIRLMoji(r render.Render, bindErr binding.Errors, im models.IRLMoji, db *models.DB, backchannel Backchannel) {
 	if bindErr.Count() > 0 {
 		r.JSON(400, JsonErrBinding(bindErr))

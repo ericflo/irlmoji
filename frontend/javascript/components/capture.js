@@ -56,7 +56,7 @@ var Emoji = React.createClass({
 
   getReplaceMode: function() {
     /*
-    var ua = this.props.userAgent;
+    var ua = this.props.app.getUserAgent();
     if (ua.match(/(iPhone|iPod|iPad|iPhone\s+Simulator)/i)) {
       if (ua.match(/OS\s+[12345]/i)) {
         return 'softbank';
@@ -82,10 +82,10 @@ var Emoji = React.createClass({
     } else if (mode === 'google') {
       return <span className="emoji">{emoji.EMOJI_DATA[this.props.emoji][2]}</span>;
     }
-    return (
+    return this.transferPropsTo(
       <img className="emoji"
            src={'/images/emoji/' + this.props.emoji + '.png'}
-           title={this.props.emoji} />
+           title={emoji.getDisplay(this.props.emoji)} />
     );
   }
 
@@ -123,7 +123,6 @@ var EmojiPicker = React.createClass({
   },
 
   render: function() {
-    var userAgent = this.props.app.getUserAgent();
     return (
       <div>
         <a href="#" onClick={this.props.onCancel}>x</a>
@@ -132,8 +131,8 @@ var EmojiPicker = React.createClass({
         {_.map(this.getEmoji(), function(key) {
           return (
             <li key={key} onClick={_.partial(this.props.onChoice, key)}>
-              <Emoji emoji={key} userAgent={userAgent} />
-              {' :' + emoji.EMOJI_DATA[key][3][0] + ':'}
+              <Emoji app={this.props.app} emoji={key} />
+              {' :' + emoji.getDisplay(key) + ':'}
             </li>
           );
         }, this)}
@@ -189,6 +188,7 @@ var ReactDropzone = React.createClass({
 });
 
 module.exports = {
+  Emoji: Emoji,
   EmojiPicker: EmojiPicker,
   Capture: Capture
 };

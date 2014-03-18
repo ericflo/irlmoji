@@ -13,29 +13,12 @@ var _ = require('lodash/dist/lodash.underscore');
 var makeRouter = require('./build/javascript/router').makeRouter;
 var routes = require('./build/javascript/routes');
 var apiBuilder = require('./build/javascript/api');
+var utils = require('./build/javascript/utils');
 
 var ENV_WARNING = ('WARNING: Could not read env.json file, so unless ' +
   'you\'ve set the environment variables manually, the app will not work.');
 
-(function readEnv() {
-  var fileData;
-  try {
-    fileData = fs.readFileSync('env.json');
-  } catch (e) {
-    if (e.code === 'ENOENT') {
-      return console.log(ENV_WARNING);
-    }
-  }
-  var data;
-  try {
-    data = JSON.parse(fileData);
-  } catch (e) {
-    return console.log(ENV_WARNING);
-  }
-  _.each(data, function(value, key) {
-    process.env[key] = value;
-  }, this);
-})();
+utils.readEnv();
 
 var NODE_ENV = process.env['NODE_ENV'];
 var PROD = NODE_ENV === 'production';
@@ -211,9 +194,9 @@ function reactHandler(req, res, next) {
     getPath: function() {
       return req.url;
     },
-    getUserAgent: function() {
+    getUserAgent: _.memoize(function() {
       return req.headers['user-agent'] || '';
-    }
+    })
   };
 
   var router = makeRouter(
@@ -226,8 +209,8 @@ function reactHandler(req, res, next) {
 
 // Set up the application and run it
 var server = connect()
-  .use(connect.logger())
   .use(connect.static(__dirname + '/build'))
+  .use(connect.logger())
   .use(connect.cookieParser())
   .use(connect.cookieSession({
     secret: IRLMOJI_COOKIE_SECRET,

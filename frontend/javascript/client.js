@@ -40,9 +40,9 @@ var app = {
   getPath: function() {
     return window.location.pathname + window.location.search;
   },
-  getUserAgent: function() {
+  getUserAgent: _.memoize(function() {
     return navigator.userAgent;
-  },
+  }),
   loadingBegan: function() {
     if (window.NProgress && !window.BOOTSTRAPPING) {
       NProgress.start();

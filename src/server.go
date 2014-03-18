@@ -112,6 +112,7 @@ func Main() {
 	// IRLMoji routes (see handlers_irlmoji.go)
 	m.Get("/api/v1/timelines/home.json", binding.Form(Limit{}), HandleGetHomeTimeline)
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
+	m.Get("/api/v1/timelines/emoji/:emoji.json", binding.Form(Limit{}), HandleGetEmojiTimeline)
 	m.Post("/api/v1/irlmoji.json", binding.Json(models.IRLMoji{}), HandleCreateIRLMoji)
 
 	m.Post("/upload", HandleUpload)

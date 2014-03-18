@@ -44,6 +44,7 @@
     "gulp-react": "~0.2.0",
     "gulp-minify-css": "~0.3.0",
     "gulp-nodemon": "~1.0.2",
-    "nodemon": "~1.0.15"
+    "nodemon": "~1.0.15",
+    "gulp-livereload": "~1.2.0"
   }
 }
