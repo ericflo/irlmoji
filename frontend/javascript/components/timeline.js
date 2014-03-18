@@ -68,9 +68,10 @@ var Timeline = React.createClass({
     }
     return (
       <div>
-        <p>You are logged in! ({this.props.user.username})</p>
-        <p><a href="/" onClick={this.handleClick}>Home</a></p>
-        <p><a href="/logout">Logout</a></p>
+        <div className="header container">
+          <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
+          <p className="logout"><a href="/logout">Logout</a></p>
+        </div>
         {_.map(this.props.timeline.timeline, function(im) {
           return (
             <IRLMoji key={im.id}
