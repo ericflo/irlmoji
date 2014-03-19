@@ -31,6 +31,21 @@ server {
         break;
     }
 
+    location /images {
+        alias /home/{{ appuser }}/{{ appname }}/build/images;
+        break;
+    }
+
+    location /styles {
+        alias /home/{{ appuser }}/{{ appname }}/build/styles;
+        break;
+    }
+
+    location /javascript {
+        alias /home/{{ appuser }}/{{ appname }}/build/javascript;
+        break;
+    }
+
     location / {
         proxy_buffering on;
         include /etc/nginx/proxy_params;

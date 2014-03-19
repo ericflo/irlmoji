@@ -88,6 +88,7 @@
 
 - name: copy nginx site config
   template: src={{ appname }}.nginx.{{ item }}.conf.j2 dest=/etc/nginx/sites-available/{{ appname }}.{{ item }}.conf mode=0644
+  tags: appnginx
   with_items:
   - api
   - frontend
