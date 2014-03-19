@@ -8,7 +8,7 @@ var auth = require('./components/auth');
 var Timeline = require('./components/timeline').Timeline;
 var emoji = require('./emoji');
 
-var DEFAULT_LIMIT = 20;
+var DEFAULT_LIMIT = 10;
 
 // Basic handlers for things like not found pages, server errors, and auth
 
