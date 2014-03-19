@@ -38,6 +38,11 @@ var IRLMoji = React.createClass({
         <Emoji app={this.props.app}
                emoji={im.emoji}
                onClick={_.partial(this.props.onEmojiTap, 'picture', im)} />
+        <span className="heart"
+              onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
+          <i className="fa fa-heart"></i>
+          <span className="num">{im.heartCount}</span>
+        </span>
         <img className="picture"
              src={this.getPicture()}
              alt={'Picture for ' + emoji.getDisplay(im.emoji)} />

@@ -27,7 +27,9 @@ func (user *User) CreateTableSQL() string {
         twitter_access_token TEXT NOT NULL,
         twitter_access_secret TEXT NOT NULL,
         time_created timestamp NOT NULL,
-        time_updated timestamp NOT NULL
+        time_updated timestamp NOT NULL,
+        UNIQUE (id),
+        UNIQUE (username)
     );
     `
 }

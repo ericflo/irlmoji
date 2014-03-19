@@ -64,6 +64,16 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
+  function toggleHeart(irlmojiId, callback) {
+    var url = urlBase + '/api/v1/irlmoji/id/' + irlmojiId + '/heart.json';
+    authed(request.post(url))
+      .type('json')
+      .send({irlmojiId: irlmojiId})
+      .set('Accept', 'application/json')
+      .set('X-CSRF-Token', csrf)
+      .end(parseResponse(callback));
+  }
+
   function getCSRF() {
     return csrf;
   }
@@ -75,6 +85,7 @@ function setupApi(opts) {
     getUserTimeline: getUserTimeline,
     getEmojiTimeline: getEmojiTimeline,
     createIRLMoji: createIRLMoji,
+    toggleHeart: toggleHeart,
     getCSRF: getCSRF
   };
 }

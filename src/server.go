@@ -37,6 +37,9 @@ func createAllTables(db *models.DB) error {
 	if err := db.CreateTable("irlmoji", &models.IRLMoji{}); err != nil {
 		return err
 	}
+	if err := db.CreateTable("heart", &models.Heart{}); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -114,6 +117,7 @@ func Main() {
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
 	m.Get("/api/v1/timelines/emoji/:emoji.json", binding.Form(Limit{}), HandleGetEmojiTimeline)
 	m.Post("/api/v1/irlmoji.json", binding.Json(models.IRLMoji{}), HandleCreateIRLMoji)
+	m.Post("/api/v1/irlmoji/id/:irlmojiId/heart.json", binding.Json(models.Heart{}), HandleToggleHeart)
 
 	m.Post("/upload", HandleUpload)
 

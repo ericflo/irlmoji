@@ -43,11 +43,46 @@ var Timeline = React.createClass({
     return false;
   },
 
+  getIrlmojiIndex: function(irlmojiId) {
+    var timeline = this.props.timeline.timeline;
+    for (var i = 0; i < timeline.length; ++i) {
+      if (timeline[i].id === irlmojiId) {
+        return i;
+      }
+    }
+    return -1;
+  },
+
+  updateIrlmojiAtIndex: function(idx, newProps) {
+    var timeline = this.props.timeline.timeline.slice(0);
+    timeline[idx] = _.extend(timeline[idx], newProps);
+    this.setProps({timeline: {timeline: timeline}});
+  },
+
+  handleToggleHeartResponse: function(error, resp) {
+    if (error !== null) {
+      // TODO: Decide how to really show this
+      return alert(error);
+    }
+    var idx = this.getIrlmojiIndex(resp.irlmoji.id);
+    this.updateIrlmojiAtIndex(idx, resp.irlmoji);
+  },
+
   handleEmojiTap: function(kind, im, ev) {
     if (kind === 'user') {
       this.props.app.router.go('/user/' + im.user.username);
     } else if (kind === 'picture') {
       this.props.app.router.go('/timeline/emoji/' + emoji.getDisplay(im.emoji));
+    } else if (kind === 'heart') {
+      this.props.app.api.toggleHeart(im.id, this.handleToggleHeartResponse);
+      var idx = this.getIrlmojiIndex(im.id);
+      if (im.hearted) {
+        this.updateIrlmojiAtIndex(idx,
+          {hearted: false, heartCount: im.heartCount - 1});
+      } else {
+        this.updateIrlmojiAtIndex(idx,
+          {hearted: true, heartCount: im.heartCount + 1});
+      }
     }
     return false;
   },

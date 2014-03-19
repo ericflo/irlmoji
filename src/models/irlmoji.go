@@ -12,6 +12,8 @@ type IRLMoji struct {
 	Emoji       string    `json:"emoji" binding:"required"`
 	Picture     string    `json:"picture" binding:"required"`
 	TimeCreated time.Time `json:"timeCreated"`
+	HeartCount  uint64    `json:"heartCount"`
+	Hearted     bool      `json:"hearted"`
 	User        User      `json:"user"`
 }
 
@@ -23,7 +25,8 @@ func (im *IRLMoji) CreateTableSQL() string {
         user_id TEXT NOT NULL,
         emoji TEXT NOT NULL,
         picture TEXT NOT NULL,
-        time_created timestamp NOT NULL
+        time_created timestamp NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES auth_user(id)
     );
     `
 }
@@ -35,6 +38,7 @@ SELECT
     I.emoji,
     I.picture,
     I.time_created,
+    (SELECT COALESCE(COUNT(1), 0) FROM heart H WHERE H.irlmoji_id = I.id),
     U.id,
     U.username,
     U.pic,
@@ -44,7 +48,7 @@ SELECT
     U.time_updated
 FROM irlmoji I
 LEFT OUTER JOIN auth_user U
-ON (I.user_id = U.id)
+     ON (I.user_id = U.id)
 `
 
 // DATABASE ACCESS STUFF
@@ -82,6 +86,7 @@ func ParseIMSQL(rows Scannable) (*IRLMoji, error) {
 		&im.Emoji,
 		&im.Picture,
 		&im.TimeCreated,
+		&im.HeartCount,
 		&im.User.Id,
 		&im.User.Username,
 		&im.User.Pic,
@@ -107,6 +112,7 @@ func (db *DB) GetIMWithId(id uint64) (*IRLMoji, error) {
 		&im.Emoji,
 		&im.Picture,
 		&im.TimeCreated,
+		&im.HeartCount,
 		&im.User.Id,
 		&im.User.Username,
 		&im.User.Pic,
