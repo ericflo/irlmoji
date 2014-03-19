@@ -5,7 +5,7 @@ var makeRouter = require('./router').makeRouter;
 var routes = require('./routes');
 var apiBuilder = require('./api');
 
-// So that Chrome developer tools sees that React is installed
+// So that Chrome developer tools see that React is installed
 window.React = React;
 window._ = _;
 
