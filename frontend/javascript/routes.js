@@ -8,6 +8,8 @@ var auth = require('./components/auth');
 var Timeline = require('./components/timeline').Timeline;
 var emoji = require('./emoji');
 
+var DEFAULT_LIMIT = 20;
+
 // Basic handlers for things like not found pages, server errors, and auth
 
 function handleNotFound(app) {
@@ -40,11 +42,17 @@ function cachedFetch(funcs, callback) {
 // The handlers themselves
 
 function handleIndex(app, user) {
-  cachedFetch({timeline: app.api.getHomeTimeline}, function(error, data) {
+  var timelineFunc = app.api.getHomeTimeline;
+  var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
+  cachedFetch(funcs, function(error, data) {
     if (error) {
       return handleServerError(app);
     }
-    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
+    app.render(<Timeline app={app}
+                         user={user}
+                         timeline={data.timeline.timeline}
+                         limit={DEFAULT_LIMIT}
+                         timelineFunc={timelineFunc} />, {
       title: 'Welcome : IRLMoji',
       user: user,
       data: data
@@ -53,27 +61,37 @@ function handleIndex(app, user) {
 }
 
 function handleUserProfile(app, user, username) {
-  var funcs = {timeline: _.partial(app.api.getUserTimeline, username)};
+  var timelineFunc = _.partial(app.api.getUserTimeline, username);
+  var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
   cachedFetch(funcs, function(error, data) {
     if (error) {
       return handleServerError(app);
     }
-    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
+    app.render(<Timeline app={app}
+                         user={user}
+                         timeline={data.timeline.timeline}
+                         limit={DEFAULT_LIMIT}
+                         timelineFunc={timelineFunc} />, {
       title: username + ' : IRLMoji',
       user: user,
-      data: data
+      data: data,
     });
   });
 }
 
 function handleTimelineEmoji(app, user, displayEmoji) {
   var emojiKey = emoji.keyFromDisplay(displayEmoji);
-  var funcs = {timeline: _.partial(app.api.getEmojiTimeline, emojiKey)};
+  var timelineFunc = _.partial(app.api.getEmojiTimeline, emojiKey);
+  var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
   cachedFetch(funcs, function(error, data) {
     if (error) {
       return handleServerError(app);
     }
-    app.render(<Timeline app={app} user={user} timeline={data.timeline} />, {
+    app.render(<Timeline app={app}
+                         user={user}
+                         timeline={data.timeline.timeline}
+                         limit={DEFAULT_LIMIT}
+                         timelineFunc={timelineFunc} />, {
       title: displayEmoji + ' : IRLMoji',
       user: user,
       data: data

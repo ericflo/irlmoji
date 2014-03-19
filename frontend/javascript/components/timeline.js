@@ -9,7 +9,10 @@ var emoji = require('../emoji');
 var Timeline = React.createClass({
 
   getInitialState: function() {
-    return {imagePath: null};
+    return {
+      imagePath: null,
+      moreLoading: false
+    };
   },
 
   handleClick: function(ev) {
@@ -44,7 +47,7 @@ var Timeline = React.createClass({
   },
 
   getIrlmojiIndex: function(irlmojiId) {
-    var timeline = this.props.timeline.timeline;
+    var timeline = this.props.timeline;
     for (var i = 0; i < timeline.length; ++i) {
       if (timeline[i].id === irlmojiId) {
         return i;
@@ -54,9 +57,9 @@ var Timeline = React.createClass({
   },
 
   updateIrlmojiAtIndex: function(idx, newProps) {
-    var timeline = this.props.timeline.timeline.slice(0);
+    var timeline = this.props.timeline.slice(0);
     timeline[idx] = _.extend(timeline[idx], newProps);
-    this.setProps({timeline: {timeline: timeline}});
+    this.setProps({timeline: timeline});
   },
 
   handleToggleHeartResponse: function(error, resp) {
@@ -87,6 +90,41 @@ var Timeline = React.createClass({
     return false;
   },
 
+  handleLoadMore: function() {
+    var self = this;
+    var preLength = this.props.timeline.length;
+    this.setState({moreLoading: true}, function() {
+      self.props.timelineFunc(self.props.limit + 20, function(error, resp) {
+        if (error !== null) {
+          alert(error);
+          return;
+        }
+        if (!self.isMounted()) {
+          return;
+        }
+        // If we haven't added any more, then there's no more to load, so we
+        // set the moreLoading variable to 'null' to indicate not to show it.
+        if (preLength === resp.timeline.length) {
+          return self.setState({moreLoading: null});
+        }
+        self.setState({moreLoading: false}, function() {
+          self.setProps({timeline: resp.timeline});
+        });
+      });
+    });
+    return false;
+  },
+
+  renderMoreLoader: function() {
+    if (this.state.moreLoading === null) {
+      return null;
+    }
+    if (this.state.moreLoading) {
+      return <span className="more">Loading...</span>;
+    }
+    return <a href="#" className="more" onClick={this.handleLoadMore}>Load more</a>;
+  },
+
   render: function() {
     var Capture = capture.Capture;
     var EmojiPicker = capture.EmojiPicker;
@@ -105,7 +143,7 @@ var Timeline = React.createClass({
           <p className="logout"><a href="/logout">Logout</a></p>
         </div>
         <div className="irlmoji-list">
-          {_.map(this.props.timeline.timeline, function(im) {
+          {_.map(this.props.timeline, function(im) {
             return (
               <IRLMoji key={im.id}
                        irlmoji={im}
@@ -116,6 +154,7 @@ var Timeline = React.createClass({
             );
           }, this)}
         </div>
+        {this.renderMoreLoader()}
         <Capture app={this.props.app}
                  onPostImageUpload={this.handlePostImageUpload} />
       </div>

@@ -32,22 +32,25 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
-  function getHomeTimeline(callback) {
+  function getHomeTimeline(limit, callback) {
     authed(request.get(urlBase + '/api/v1/timelines/home.json'))
+      .query({limit: limit})
       .set('Accept', 'application/json')
       .end(parseResponse(callback));
   }
 
-  function getUserTimeline(username, callback) {
+  function getUserTimeline(username, limit, callback) {
     var url = urlBase + '/api/v1/timelines/user/username/' + username + '.json';
     authed(request.get(url))
+      .query({limit: limit})
       .set('Accept', 'application/json')
       .end(parseResponse(callback));
   }
 
-  function getEmojiTimeline(emojiKey, callback) {
+  function getEmojiTimeline(emojiKey, limit, callback) {
     var url = urlBase + '/api/v1/timelines/emoji/' + emojiKey + '.json';
     authed(request.get(url))
+      .query({limit: limit})
       .set('Accept', 'application/json')
       .end(parseResponse(callback));
   }
