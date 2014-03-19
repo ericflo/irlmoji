@@ -6,6 +6,9 @@
 - name: restart frontend
   service: name=irlmoji-frontend state=restarted
 
+- name: rebuild frontend
+  command: /home/{{ appuser }}/{{ appname }}/node_modules/.bin/gulp chdir=/home/{{ appuser }}/{{ appname }}
+
 - name: install npm dependencies
   npm: path=/home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }} executable=/usr/bin/npm
   sudo: yes

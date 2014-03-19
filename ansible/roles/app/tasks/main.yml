@@ -66,6 +66,7 @@
   sudo_user: $appuser
   notify:
   - install npm dependencies
+  - rebuild frontend
   - restart api
   - restart frontend
 
