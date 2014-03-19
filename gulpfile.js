@@ -9,7 +9,7 @@ var browserify = require('gulp-browserify');
 var rename = require('gulp-rename');
 var minifycss = require('gulp-minify-css');
 var nodemon = require('gulp-nodemon');
-var livereload = require('gulp-livereload')
+//var livereload = require('gulp-livereload')
 var utils = require('./frontend/javascript/utils');
 
 utils.readEnv();
@@ -54,8 +54,8 @@ gulp.task('styles', function() {
     .pipe(gulp.dest('build/'))
     .pipe(minifycss())
     .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest('build/'))
-    .pipe(livereload());
+    .pipe(gulp.dest('build/'));
+    //.pipe(livereload());
 });
 
 // Images
