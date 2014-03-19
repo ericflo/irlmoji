@@ -1,0 +1,116 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          pgbouncer
+# Required-Start:    $syslog $remote_fs
+# Required-Stop:     $syslog $remote_fs
+# Should-Start:      postgresql
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start pgbouncer
+# Description: pgbouncer is a connection pool server and replication
+#              proxy for PostgreSQL.
+### END INIT INFO
+
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/pgbouncer
+PIDFILE=/var/run/postgresql/pgbouncer.pid
+OPTS="-d /etc/pgbouncer/pgbouncer.ini"
+
+test -x $DAEMON || exit 5
+
+# Include pgbouncer defaults if available
+if [ -f /etc/default/pgbouncer ] ; then
+    . /etc/default/pgbouncer
+fi
+
+
+. /lib/lsb/init-functions
+
+
+is_running() {
+    pidofproc -p $PIDFILE $DAEMON >/dev/null
+}
+
+
+d_start() {
+    mkdir -p /var/run/postgresql
+    chown postgres /var/run/postgresql
+    if [ ${START} -eq 1 ]; then
+        if is_running; then
+            :
+        else
+            su -c "$DAEMON $OPTS 2> /dev/null &" - postgres
+        fi
+    else
+        log_warning_msg "pgbouncer daemon disabled in /etc/default/pgbouncer"
+    fi
+}
+
+d_reload() {
+    is_running || return 0
+
+    killproc -p $PIDFILE $DAEMON HUP
+}
+
+d_stop() {
+    SIGS='INT TERM KILL'
+
+    for sig in $SIGS
+    do
+    is_running || return 0
+
+    killproc -p $PIDFILE $DAEMON $sig
+    sleep 1
+    done
+}
+
+case "$1" in
+    start)
+    log_daemon_msg Starting pgbouncer
+    d_start
+    log_end_msg $?
+    ;;
+    stop)
+    log_daemon_msg Stopping pgbouncer
+    d_stop
+    log_end_msg $?
+    ;;
+    status)
+    is_running
+    status=$?
+    if [ $status -eq 0 ]; then
+        log_success_msg "pgbouncer is running"
+    else
+        log_failure_msg "pgbouncer is not running"
+    fi
+    exit $status
+    ;;
+    restart)
+    log_daemon_msg "Restarting pgbouncer" pgbouncer
+    d_stop
+    d_start
+    log_end_msg $?
+    ;;
+    try-restart)
+    if $0 status >/dev/null; then
+        $0 restart
+    else
+        exit 0
+    fi
+    ;;
+    reload|force-reload)
+    if is_running; then
+        log_daemon_msg "Reloading configuration" pgbouncer
+        d_reload
+        log_end_msg $?
+    else
+        log_failure_msg "pgbouncer is not running."
+    fi
+    ;;
+    *)
+    log_failure_msg "Usage: $0 {start|stop|status|restart|try-restart|reload|force-reload}"
+    exit 2
+    ;;
+esac

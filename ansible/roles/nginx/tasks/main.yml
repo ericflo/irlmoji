@@ -1,0 +1,39 @@
+---
+
+- name: ensure python-pycurl is present for the apt_repository command
+  apt: pkg=python-pycurl state=present
+
+- name: add nginx development ppa
+  apt_repository: repo='ppa:nginx/development'
+
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: install nginx
+  apt: pkg=nginx state=present
+  notify:
+  - restart nginx
+
+- name: copy nginx config
+  template: src={{ item }}.j2 dest=/etc/nginx/{{ item }} mode=0644
+  with_items:
+  - nginx.conf
+  - proxy_params
+  - spdy
+  notify:
+  - restart nginx
+
+- name: make sure nginx default site is removed
+  file: path=/etc/nginx/sites-enabled/default state=absent
+  notify:
+  - restart nginx
+
+- name: copy ssl certificate
+  template: src=irlmoji.com.pem.j2 dest=/etc/nginx/irlmoji.com.pem
+  notify:
+  - restart nginx
+
+- name: copy ssl key
+  template: src=irlmoji.com.key.j2 dest=/etc/nginx/irlmoji.com.key
+  notify:
+  - restart nginx

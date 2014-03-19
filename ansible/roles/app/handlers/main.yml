@@ -1,0 +1,15 @@
+---
+
+- name: restart irlmoji-api
+  service: name=irlmoji-api state=restarted
+
+- name: restart irlmoji-frontend
+  service: name=irlmoji-frontend state=restarted
+
+- name: install npm dependencies
+  npm: path=/home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }} executable=/usr/bin/npm
+  sudo: yes
+  sudo_user: $appuser
+
+- name: restart nginx
+  service: name=nginx state=restarted

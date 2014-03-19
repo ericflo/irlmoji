@@ -1,0 +1,29 @@
+---
+
+- name: install pgbouncer
+  apt: pkg=pgbouncer state=present
+  tags: pgbouncer
+
+- name: copy pgbouncer config file
+  template: src=pgbouncer.ini.j2 dest=/etc/pgbouncer/pgbouncer.ini mode=0644
+  tags: pgbouncer
+  notify: 
+  - restart pgbouncer
+
+- name: copy pgbouncer userlist file
+  template: src=userlist.txt.j2 dest=/etc/pgbouncer/userlist.txt mode=0644
+  tags: pgbouncer
+  notify:
+  - restart pgbouncer
+
+- name: copy pgbouncer defaults file
+  template: src=pgbouncer.j2 dest=/etc/default/pgbouncer mode=0644
+  tags: pgbouncer
+  notify:
+  - restart pgbouncer
+
+- name: replace pgbouncer run script with one that creates the run directory
+  template: src=pgbouncer_init.j2 dest=/etc/init.d/pgbouncer mode=755
+  tags: pgbouncer
+  notify:
+  - restart pgbouncer

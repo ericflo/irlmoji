@@ -1,0 +1,100 @@
+---
+
+- name: install slimfast package dependencies
+  apt: pkg={{ item }} state=present
+  with_items:
+  - git-svn
+  - mercurial
+  - bzr
+  - software-properties-common
+  - python-software-properties
+  - libpq-dev
+  - postgresql-client
+  - python-psycopg2
+  - python-psycopg2-dbg
+  - python-virtualenv
+  - python-dev
+  - pkg-config
+  - libffi-dev
+  - checkinstall
+
+- name: add nodejs apt repository
+  apt_repository: repo='ppa:chris-lea/node.js'
+
+- name: update apt cache
+  apt: update_cache=yes
+
+- name: install nodejs
+  apt: pkg=nodejs state=present
+
+- name: create user account for running the app
+  user: name={{ appuser }} shell=/bin/bash
+
+- name: make directories in the user home
+  file: path=/home/{{ appuser }}/{{ item }} owner={{ appuser }} group={{ appuser }} recurse=yes state=directory
+  with_items:
+  - go/bin
+  - go/pkg
+  - go/src/github.com/ericflo
+  - go
+
+- name: set gopath
+  lineinfile: dest=/home/{{ appuser }}/.profile regexp="^export GOPATH" insertafter="^#umask 022" line="export GOPATH=$HOME/go"
+
+- name: check if go is installed
+  command: go version
+  register: goinstalled
+  ignore_errors: True
+  changed_when: False
+
+- name: download godeb
+  when: goinstalled|failed
+  get_url: url=https://godeb.s3.amazonaws.com/godeb-amd64.tar.gz dest=/tmp/godeb-amd64.tar.gz
+
+- name: extract godeb
+  when: goinstalled|failed
+  command: tar xvfz godeb-amd64.tar.gz chdir=/tmp
+
+- name: install go using godeb
+  when: goinstalled|failed
+  command: ./godeb install chdir=/tmp
+
+- name: checkout app repo
+  git: repo=https://{{ gitkey }}:x-oauth-basic@github.com/ericflo/{{ appname }}.git dest=/home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
+  sudo: yes
+  sudo_user: $appuser
+  notify:
+  - install npm dependencies
+  - restart api
+  - restart frontend
+
+- name: copy env.json
+  template: src=env.json.j2 dest=/home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}/env.json owner={{ appuser }} group={{ appuser }} mode=0644
+  notify:
+  - restart api
+  - restart frontend
+
+- name: copy nginx site config
+  template: src={{ appname }}.nginx.{{ item }}.conf.j2 dest=/etc/nginx/sites-available/{{ appname }}.{{ item }}.conf mode=0644
+  with_items:
+  - api
+  - frontend
+  notify:
+  - restart nginx
+
+- name: symlink nginx site config into sites-enabled
+  file: src=/etc/nginx/sites-available/{{ appname }}.{{ item }}.conf dest=/etc/nginx/sites-enabled/{{ appname }}.{{ item }}.conf state=link
+  with_items:
+  - api
+  - frontend
+  notify:
+  - restart nginx
+
+- name: install irlmoji upstart config
+  template: src={{ appname }}-{{ item }}.conf.j2 dest=/etc/init/{{ appname }}-{{ item }}.conf mode=0644
+  with_items:
+  - api
+  - frontend
+  notify:
+  - restart api
+  - restart frontend

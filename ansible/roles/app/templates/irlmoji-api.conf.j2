@@ -1,0 +1,15 @@
+start on runlevel [2345]
+stop on runlevel [016]
+
+respawn
+
+chdir /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
+
+env GOPATH=/home/{{ appuser }}/go
+
+pre-start script
+    chpst -u {{ appuser }} go get
+    chpst -u {{ appuser }} go build main.go
+end script
+
+exec chpst -u {{ appuser }} /home/{{ appuser }}/go/bin/irlmoji

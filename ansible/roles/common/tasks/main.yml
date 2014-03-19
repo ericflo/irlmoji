@@ -1,0 +1,53 @@
+---
+
+- name: update system services
+  apt: update_cache=yes upgrade=safe
+  tags: common
+
+- name: install base libraries
+  apt: pkg={{ item }} state=present
+  tags: common
+  with_items:
+  - git-svn
+  - manpages-dev
+  - build-essential
+  - ntp
+  - python-keyczar
+  - runit
+
+- name: configure ntp file
+  template: src=ntp.conf.j2 dest=/etc/ntp.conf
+  tags:
+  - ntp
+  - common
+  notify: restart ntp
+
+- name: start the ntp service
+  service: name=ntp state=started enabled=true
+  tags:
+  - ntp
+  - common
+
+- name: ensure root ssh dir exists
+  file: path=/root/.ssh state=directory
+  tags: common
+
+- name: set root authorized keys
+  template: src=authorized_keys.j2 dest=/root/.ssh/authorized_keys mode=0644
+  tags: common
+
+- name: set up pam sessions
+  template: src=pam-{{ item }}.j2 dest=/etc/pam.d/{{ item }} mode=0644
+  tags: common
+  with_items:
+  - common-session-noninteractive
+  - common-session
+
+- name: set up limits.conf
+  template: src=30-common-limits.conf.j2 dest=/etc/security/limits.d/30-common-limits.conf mode=0644
+  tags: common
+
+- name: set up sysctl common configuration
+  template: src=sysctl-common.conf.j2 dest=/etc/sysctl.d/common.conf mode=0644
+  tags: common
+  notify: reload common sysctl

@@ -1,0 +1,18 @@
+---
+
+appname: irlmoji
+appuser: irlmoji
+databases:
+  - name: irlmoji
+    host: www.irlmoji.com
+    port: 5433
+    user: irlmoji
+    password: irlmoji
+    pool_size: 20
+db_port: 5433
+db_max_conns: 100
+db_user: irlmoji
+db_password: irlmoji
+db_pool_host: 127.0.0.1
+db_pool_port: 5432
+gitkey: YOUR_GIT_KEY_HERE

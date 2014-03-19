@@ -1,0 +1,35 @@
+upstream api {
+    server 127.0.0.1:3000 max_fails=3 fail_timeout=0;
+}
+
+server {
+    listen 80 default_server deferred;
+    server_name api.irlmoji.com;
+
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 default_server deferred spdy;
+    server_name api.irlmoji.com;
+
+    access_log /var/log/nginx/api.https.access.log;
+    root /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }};
+    index index.html;
+    keepalive_timeout 70;
+
+    include /etc/nginx/spdy;
+
+    location /__ngx_status__ {
+        stub_status on;
+        access_log off;
+        break;
+    }
+
+    location / {
+        proxy_buffering on;
+        include /etc/nginx/proxy_params;
+        proxy_pass http://api;
+        break;
+    }
+}

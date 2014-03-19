@@ -1,0 +1,13 @@
+---
+
+- name: apply all configuration to the appserver
+  hosts: appserver
+  tags: commonmeta
+  remote_user: root
+
+  roles:
+    - common
+    - pgbouncer
+    - nginx
+    - db
+    - app

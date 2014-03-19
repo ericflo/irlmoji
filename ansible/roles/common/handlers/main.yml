@@ -1,0 +1,7 @@
+---
+
+- name: restart ntp
+  service: name=ntp state=restarted
+
+- name: reload common sysctl
+  command: sysctl -q -p /etc/sysctl.d/common.conf

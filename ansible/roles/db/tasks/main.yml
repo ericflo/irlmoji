@@ -1,0 +1,90 @@
+---
+# This playbook will install postgresql and create db user and give permissions.
+
+- name: ensure python-pycurl is present for the apt_repository command
+  apt: pkg=python-pycurl state=present
+  tags: db
+
+- name: add updated postgresql repository
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ precise-pgdg main' state=present
+  tags: db
+
+- name: add postgresql repository key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+  tags: db
+
+- name: update apt cache
+  apt: update_cache=yes
+  tags: db
+
+- name: install postgresql packages
+  apt: pkg={{ item }} state=present
+  tags: db
+  with_items:
+  - postgresql
+  - libpq-dev
+  - python-dev
+  - python-virtualenv
+  - python-psycopg2
+  - python-psycopg2-dbg
+  - lzop
+  - pv
+  notify:
+  - restart postgresql
+
+- name: set up wal-e envdir and virtualenv directories
+  file: path=/etc/wal-e/{{ item }} recurse=yes state=directory
+  tags: db
+  with_items:
+  - env
+  - venv
+  notify:
+  - restart postgresql
+
+- name: add wal-e environment variables to envdir
+  template: src={{ item }}.j2 dest=/etc/wal-e/env/{{ item }} mode=0644
+  tags: db
+  with_items:
+  - AWS_ACCESS_KEY_ID
+  - AWS_SECRET_ACCESS_KEY
+  - WALE_S3_PREFIX
+  - PGUSER
+  - PGPORT
+  notify:
+  - restart postgresql
+
+- name: install wal-e to the virtualenv
+  pip: name=wal-e version=0.6.9 virtualenv=/etc/wal-e/venv
+  tags: db
+  notify:
+  - restart postgresql
+
+- name: install nightly wal-e base backup cron
+  cron: name="nightly database backup to s3" hour=1 job="chpst -e /etc/wal-e/env /etc/wal-e/venv/bin/wal-e backup-push /var/lib/postgresql/9.3/main/ > /dev/null 2>&1"
+  tags: db
+
+- name: start postgresql service
+  service: name=postgresql state=started enabled=true
+  tags: db
+
+- name: create postgresql configuration files
+  template: src={{ item }}.conf.j2 dest=/etc/postgresql/9.3/main/{{ item }}.conf mode=0644
+  tags: db
+  with_items:
+  - postgresql
+  - pg_hba
+  # - recovery
+  notify: 
+  - restart postgresql
+
+- meta: flush_handlers
+
+- name: create application db user
+  postgresql_user: name={{ item.user }} password={{ item.password }} port={{ db_port }} role_attr_flags=SUPERUSER
+  tags: db
+  with_items: databases
+
+- name: create application database
+  postgresql_db: name={{ item.name }} owner={{ item.user }} port={{ db_port }} template=template0 encoding=UTF8 state=present
+  tags: db
+  with_items: databases
