@@ -25,6 +25,12 @@ function render(reactElt, opts) {
   app.loadingEnded();
 }
 
+function registerGoogleAnalyticsPageview() {
+  window.ga('create', process.env.GA_ID, process.env.GA_DOMAIN);
+  window.ga('send', 'pageview',
+    window.location.pathname + window.location.search);
+}
+
 var app = {
   render: render,
   api: api,
@@ -52,6 +58,7 @@ var app = {
     if (window.NProgress) {
       NProgress.done();
     }
+    registerGoogleAnalyticsPageview();
     window.BOOTSTRAPPING = false;
   }
 };
