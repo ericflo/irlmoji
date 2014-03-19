@@ -38,9 +38,12 @@ var IRLMoji = React.createClass({
         <Emoji app={this.props.app}
                emoji={im.emoji}
                onClick={_.partial(this.props.onEmojiTap, 'picture', im)} />
-        <span className="heart"
+        <span className="heart icon"
               onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
-          <i className="fa fa-heart"></i>
+          <i className={'fa fa-heart' + (im.hearted ? '' : '-o hearted')}></i>
+        </span>
+        <span className="heart count"
+              onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
           <span className="num">{im.heartCount}</span>
         </span>
         <img className="picture"
