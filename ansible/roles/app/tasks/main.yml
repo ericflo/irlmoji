@@ -61,6 +61,7 @@
 
 - name: checkout app repo
   git: repo=https://{{ gitkey }}:x-oauth-basic@github.com/ericflo/{{ appname }}.git dest=/home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
+  tags: apprepo
   sudo: yes
   sudo_user: $appuser
   notify:
