@@ -5,8 +5,4 @@ respawn
 
 chdir /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
 
-pre-start script
-    chpst -u {{ appuser }} /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}/node_modules/.bin/gulp
-end script
-
 exec chpst -u {{ appuser }} node server.js
