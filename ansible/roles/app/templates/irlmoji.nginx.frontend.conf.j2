@@ -27,7 +27,7 @@ server {
     }
 
     location /build {
-        root /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}/build;
+        alias /home/{{ appuser }}/{{ appname }}/build;
         break;
     }
 
