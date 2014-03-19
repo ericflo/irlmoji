@@ -26,7 +26,7 @@ function handleAuth(app) {
   var Auth = auth.Auth;
   console.log(Auth);
   app.render(<Auth app={app} onLogin={function(user) {
-    cosnole.log('inside');
+    console.log('inside');
     app.router.reload();
   }} />);
 }
