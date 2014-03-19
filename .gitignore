@@ -18,6 +18,7 @@ _testmain.go
 *.exe
 *.test
 gin-bin
+irlmoji
 
 # Node stuff
 node_modules
@@ -29,9 +30,9 @@ coverage
 build/Release
 
 # Ansible
+ansible/roles/app/templates/env.json.j2
 ansible/roles/nginx/templates/irlmoji.com.key.j2
 ansible/roles/nginx/templates/irlmoji.com.pem.j2
-ansible/roles/app/templates/env.json.j2
 ansible/roles/db/templates/AWS_ACCESS_KEY_ID.j2
 ansible/roles/db/templates/AWS_SECRET_ACCESS_KEY.j2
 ansible/roles/db/templates/WALE_S3_PREFIX.j2

@@ -15,4 +15,5 @@ db_user: irlmoji
 db_password: irlmoji
 db_pool_host: 127.0.0.1
 db_pool_port: 5432
+extra_path: ./node_modules/.bin/
 gitkey: YOUR_GIT_KEY_HERE
