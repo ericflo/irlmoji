@@ -17,3 +17,9 @@ Install Yourself
   'ansible/roles/db/templates/WALE_S3_PREFIX.j2'.
 * Fill in the vars at 'ansible/group_vars/appserver' (look at
   'ansible/group_vars/appserver.example')
+
+TODO
+====
+* Tests (oops)
+* Figure out why it doesn't work when in production mode (WTF!?)
+* Many many more things
