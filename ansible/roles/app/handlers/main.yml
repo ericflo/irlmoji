@@ -1,9 +1,9 @@
 ---
 
-- name: restart irlmoji-api
+- name: restart api
   service: name=irlmoji-api state=restarted
 
-- name: restart irlmoji-frontend
+- name: restart frontend
   service: name=irlmoji-frontend state=restarted
 
 - name: install npm dependencies
