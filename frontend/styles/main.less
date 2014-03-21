@@ -33,6 +33,15 @@
     margin-bottom: @margin;
     .clearfix();
 
+    .actions-enter {
+      opacity: 0.01;
+      transition: opacity 0.5s ease-in;
+    }
+
+    .actions-enter.actions-enter-active {
+      opacity: 1;
+    }
+
     .userpic {
         position: absolute;
         cursor: pointer;

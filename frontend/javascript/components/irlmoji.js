@@ -10,6 +10,10 @@ var IRLMoji = React.createClass({
 
   mixins: [mixins.ScreenDimensionsMixin],
 
+  getInitialState: function() {
+    return {imageLoaded: false};
+  },
+
   getScreenDimensionElement: function() {
     return this.getDOMNode();
   },
@@ -26,28 +30,39 @@ var IRLMoji = React.createClass({
     return resized.replace('.jpg', '/500.jpg');
   },
 
+  handleImageLoad: function() {
+    this.setState({imageLoaded: true});
+  },
+
   render: function() {
+    var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
     var Emoji = capture.Emoji;
     var im = this.props.irlmoji;
     return (
       <div className="irlmoji">
-        <img className="userpic"
-             src={this.getUserPic()}
-             alt={im.user.username}
-             onClick={_.partial(this.props.onEmojiTap, 'user', im)} />
-        <Emoji app={this.props.app}
-               emoji={im.emoji}
-               onClick={_.partial(this.props.onEmojiTap, 'picture', im)} />
-        <span className="heart icon"
-              onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
-          <i className={'fa fa-heart' + (im.hearted ? '' : '-o hearted')}></i>
-        </span>
-        <span className="heart count"
-              onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
-          <span className="num">{im.heartCount}</span>
-        </span>
+        <ReactCSSTransitionGroup transitionName="actions">
+          {this.state.imageLoaded ?
+            <div className="actions">
+              <img className="userpic"
+                   src={this.getUserPic()}
+                   alt={im.user.username}
+                   onClick={_.partial(this.props.onEmojiTap, 'user', im)} />
+              <Emoji app={this.props.app}
+                     emoji={im.emoji}
+                     onClick={_.partial(this.props.onEmojiTap, 'picture', im)} />
+              <span className="heart icon"
+                    onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
+                <i className={'fa fa-heart' + (im.hearted ? '' : '-o hearted')}></i>
+              </span>
+              <span className="heart count"
+                    onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
+                <span className="num">{im.heartCount}</span>
+              </span>
+            </div> : null}
+        </ReactCSSTransitionGroup>
         <img className="picture"
              src={this.getPicture()}
+             onLoad={this.handleImageLoad}
              alt={'Picture for ' + emoji.getDisplay(im.emoji)} />
       </div>
     );
