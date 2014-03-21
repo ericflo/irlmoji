@@ -25,3 +25,4 @@ TODO
 * Parse Emoji upload
 * About page
 * Many many more things
+* Lock down ports
