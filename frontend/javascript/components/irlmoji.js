@@ -15,7 +15,7 @@ var IRLMoji = React.createClass({
     // This is a backup in case for whatever reason the image doesn't load
     this.timer = window.setTimeout(_.bind(function() {
       this.setState({imageLoaded: true});
-    }, this), 2000);
+    }, this), 500);
   },
 
   componentWillUnmount: function() {
