@@ -25,7 +25,7 @@ func HandleGetHomeTimeline(r render.Render, limit Limit, db *models.DB, backchan
 	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
 }
 
-func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB) {
+func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB, backchannel Backchannel) {
 	user, err := db.GetUserWithUsername(params["username"])
 	if err != nil {
 		r.JSON(404, JsonErr("Username '"+params["username"]+"' not found."))
