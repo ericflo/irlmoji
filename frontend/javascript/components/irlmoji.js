@@ -19,7 +19,9 @@ var IRLMoji = React.createClass({
   },
 
   getUserPic: function() {
-    return this.props.irlmoji.user.pic.replace('_normal', '');
+    return this.props.irlmoji.user.pic
+      .replace('_normal', '')
+      .replace('http:', 'https:');
   },
 
   getPicture: function() {
