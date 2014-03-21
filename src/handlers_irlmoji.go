@@ -38,7 +38,7 @@ func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, 
 		return
 	}
 	for _, im := range timeline {
-		err = db.AnnotateHearted(im, user.Id)
+		err = db.AnnotateHearted(im, backchannel.UserId())
 		if err != nil {
 			log.Println("Error annotating hearted info:", err.Error())
 			r.JSON(500, "Sorry, an internal server error has occurred.")
