@@ -10,6 +10,7 @@ import (
 	"launchpad.net/goamz/aws"
 	"log"
 	"os"
+	"strconv"
 )
 
 const DEFAULT_LIMIT uint32 = 50
@@ -44,14 +45,14 @@ func createAllTables(db *models.DB) error {
 }
 
 type Limit struct {
-	Limit uint32 `form:"limit"`
+	Limit string `form:"limit"`
 }
 
 func (limit Limit) GetLimit() uint32 {
-	if limit.Limit == uint32(0) {
-		return DEFAULT_LIMIT
+	if lim, err := strconv.Atoi(limit.Limit); err == nil {
+		return uint32(lim)
 	}
-	return limit.Limit
+	return DEFAULT_LIMIT
 }
 
 func JsonErr(err string) map[string]string {
