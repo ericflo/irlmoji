@@ -3,19 +3,25 @@
 var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
 var capture = require('./capture');
-var mixins = require('./mixins');
 var emoji = require('../emoji');
 
 var IRLMoji = React.createClass({
-
-  mixins: [mixins.ScreenDimensionsMixin],
 
   getInitialState: function() {
     return {imageLoaded: false};
   },
 
-  getScreenDimensionElement: function() {
-    return this.getDOMNode();
+  componentDidMount: function() {
+    // This is a backup in case for whatever reason the image doesn't load
+    this.timer = window.setTimeout(_.bind(function() {
+      this.setState({imageLoaded: true});
+    }, this), 2000);
+  },
+
+  componentWillUnmount: function() {
+    if (typeof window !== 'undefined') {
+      window.clearTimeout(this.timer);
+    }
   },
 
   getUserPic: function() {
@@ -60,7 +66,7 @@ var IRLMoji = React.createClass({
                     onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
                 <span className="num">{im.heartCount}</span>
               </span>
-            </div> : null}
+            </div> : []}
         </ReactCSSTransitionGroup>
         <img className="picture"
              src={this.getPicture()}

@@ -148,8 +148,6 @@ var Timeline = React.createClass({
               <IRLMoji key={im.id}
                        irlmoji={im}
                        app={this.props.app}
-                       screenWidth={this.state.screenWidth}
-                       screenHeight={this.state.screenHeight}
                        onEmojiTap={this.handleEmojiTap} />
             );
           }, this)}
