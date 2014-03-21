@@ -6,6 +6,7 @@ import (
 	"github.com/codegangsta/martini-contrib/render"
 	"github.com/ericflo/irlmoji/src/models"
 	"log"
+	"strconv"
 )
 
 func HandleGetHomeTimeline(r render.Render, limit Limit, db *models.DB, backchannel Backchannel) {
@@ -92,6 +93,28 @@ func HandleCreateIRLMoji(r render.Render, bindErr binding.Errors, im models.IRLM
 	}
 
 	r.JSON(200, map[string]*models.IRLMoji{"irlmoji": insertedIM})
+}
+
+func HandleGetIRLMoji(r render.Render, db *models.DB, params martini.Params, backchannel Backchannel, limit Limit) {
+	irlmojiId, err := strconv.ParseUint(params["irlmojiId"], 10, 64)
+	if err != nil {
+		r.JSON(404, JsonErr("Invalid IRLMoji id provided:"+
+			params["irlmojiId"]))
+	}
+	im, err := db.GetIMWithId(irlmojiId)
+	if err != nil {
+		r.JSON(404, JsonErr("The provided IRLMoji id was invalid:"+
+			params["irlmojiId"]))
+		return
+	}
+	hearts, err := db.GetHeartsForIRLMoji(irlmojiId, limit.GetLimit())
+	if err == nil {
+		im.Hearts = hearts
+	} else {
+		log.Println("WARNING: Could not get IRLMoji hearts:", err.Error())
+	}
+
+	r.JSON(200, map[string]*models.IRLMoji{"irlmoji": im})
 }
 
 func HandleToggleHeart(r render.Render, bindErr binding.Errors, heart models.Heart, db *models.DB, backchannel Backchannel) {

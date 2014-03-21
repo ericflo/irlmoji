@@ -14,6 +14,7 @@ type IRLMoji struct {
 	TimeCreated time.Time `json:"timeCreated"`
 	HeartCount  uint64    `json:"heartCount"`
 	Hearted     bool      `json:"hearted"`
+	Hearts      []*Heart  `json:"hearts,omitempty"`
 	User        User      `json:"user"`
 }
 
@@ -31,7 +32,7 @@ func (im *IRLMoji) CreateTableSQL() string {
     `
 }
 
-const BASE_QUERY string = `
+const BASE_IRLMOJI_QUERY string = `
 SELECT
     I.id,
     I.user_id,
@@ -106,7 +107,7 @@ func ParseIMSQL(rows Scannable) (*IRLMoji, error) {
 
 func (db *DB) GetIMWithId(id uint64) (*IRLMoji, error) {
 	var im IRLMoji
-	err := db.SQLDB.QueryRow(BASE_QUERY+"WHERE I.id = $1", id).Scan(
+	err := db.SQLDB.QueryRow(BASE_IRLMOJI_QUERY+"WHERE I.id = $1", id).Scan(
 		&im.Id,
 		&im.UserId,
 		&im.Emoji,
@@ -125,7 +126,7 @@ func (db *DB) GetIMWithId(id uint64) (*IRLMoji, error) {
 }
 
 func (db *DB) GetAllIMs(limit uint32) ([]*IRLMoji, error) {
-	rows, err := db.SQLDB.Query(BASE_QUERY+`
+	rows, err := db.SQLDB.Query(BASE_IRLMOJI_QUERY+`
 		ORDER BY I.time_created DESC
         LIMIT $1`,
 		limit,
@@ -137,7 +138,7 @@ func (db *DB) GetAllIMs(limit uint32) ([]*IRLMoji, error) {
 }
 
 func (db *DB) GetIMsForUser(userId string, limit uint32) ([]*IRLMoji, error) {
-	rows, err := db.SQLDB.Query(BASE_QUERY+`
+	rows, err := db.SQLDB.Query(BASE_IRLMOJI_QUERY+`
         WHERE I.user_id = $1
         ORDER BY I.time_created DESC
         LIMIT $2`,
@@ -151,7 +152,7 @@ func (db *DB) GetIMsForUser(userId string, limit uint32) ([]*IRLMoji, error) {
 }
 
 func (db *DB) GetIMsForEmoji(emoji string, limit uint32) ([]*IRLMoji, error) {
-	rows, err := db.SQLDB.Query(BASE_QUERY+`
+	rows, err := db.SQLDB.Query(BASE_IRLMOJI_QUERY+`
         WHERE I.emoji = $1
         ORDER BY I.time_created DESC
         LIMIT $2`,

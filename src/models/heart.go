@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -9,6 +10,7 @@ type Heart struct {
 	UserId      string    `json:"userId"`
 	IRLMojiId   uint64    `json:"irlmojiId" binding:"required"`
 	TimeCreated time.Time `json:"timeCreated"`
+	User        User      `json:"user"`
 }
 
 func (h *Heart) CreateTableSQL() string {
@@ -25,6 +27,23 @@ func (h *Heart) CreateTableSQL() string {
     `
 }
 
+const BASE_HEART_QUERY string = `
+SELECT
+	H.user_id,
+    H.irlmoji_id,
+    H.time_created,
+    U.id,
+    U.username,
+    U.pic,
+    U.twitter_access_token,
+    U.twitter_access_secret,
+    U.time_created,
+    U.time_updated
+FROM heart H
+LEFT OUTER JOIN auth_user U
+     ON (H.user_id = U.id)
+`
+
 // DATABASE ACCESS STUFF
 
 func HeartRowReturn(err error, heart *Heart) (*Heart, error) {
@@ -38,7 +57,44 @@ func HeartRowReturn(err error, heart *Heart) (*Heart, error) {
 	}
 }
 
-// TODO: The rest
+func HeartRowsReturn(rows *sql.Rows) ([]*Heart, error) {
+	hearts := make([]*Heart, 0)
+	for rows.Next() {
+		if heart, err := ParseHeartSQL(rows); err != nil {
+			log.Println("Error parsing row result:", err)
+			continue
+		} else {
+			hearts = append(hearts, heart)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return hearts, nil
+}
+
+func ParseHeartSQL(rows Scannable) (*Heart, error) {
+	var heart Heart
+	err := rows.Scan(
+		&heart.UserId,
+		&heart.IRLMojiId,
+		&heart.TimeCreated,
+		&heart.User.Id,
+		&heart.User.Username,
+		&heart.User.Pic,
+		&heart.User.TwitterAccessToken,
+		&heart.User.TwitterAccessSecret,
+		&heart.User.TimeCreated,
+		&heart.User.TimeUpdated,
+	)
+
+	switch {
+	case err != nil:
+		return nil, err
+	default:
+		return &heart, nil
+	}
+}
 
 func (db *DB) GetHeart(userId string, imId uint64) (*Heart, error) {
 	var heart Heart
@@ -106,4 +162,18 @@ func (db *DB) AnnotateHearted(im *IRLMoji, userId string) error {
 	}
 	im.Hearted = heart != nil
 	return nil
+}
+
+func (db *DB) GetHeartsForIRLMoji(irlmojiId uint64, limit uint32) ([]*Heart, error) {
+	rows, err := db.SQLDB.Query(BASE_HEART_QUERY+`
+        WHERE H.irlmoji_id = $1
+        ORDER BY H.time_created DESC
+        LIMIT $2`,
+		irlmojiId,
+		limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return HeartRowsReturn(rows)
 }
