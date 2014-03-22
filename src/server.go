@@ -118,6 +118,7 @@ func Main() {
 	m.Get("/api/v1/timelines/user/username/:username.json", binding.Form(Limit{}), HandleGetUserTimeline)
 	m.Get("/api/v1/timelines/emoji/:emoji.json", binding.Form(Limit{}), HandleGetEmojiTimeline)
 	m.Get("/api/v1/irlmoji/id/:irlmojiId.json", binding.Form(Limit{}), HandleGetIRLMoji)
+	m.Delete("/api/v1/irlmoji/id/:irlmojiId.json", HandleDeleteIRLMoji)
 	m.Post("/api/v1/irlmoji.json", binding.Json(models.IRLMoji{}), HandleCreateIRLMoji)
 	m.Post("/api/v1/irlmoji/id/:irlmojiId/heart.json", binding.Json(models.Heart{}), HandleToggleHeart)
 

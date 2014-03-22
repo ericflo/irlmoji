@@ -59,6 +59,7 @@ func IMRowReturn(err error, im *IRLMoji) (*IRLMoji, error) {
 	case err != nil:
 		return nil, err
 	default:
+		im.User.IsAdmin = im.User.GetIsAdmin()
 		return im, nil
 	}
 }
@@ -101,6 +102,7 @@ func ParseIMSQL(rows Scannable) (*IRLMoji, error) {
 	case err != nil:
 		return nil, err
 	default:
+		im.User.IsAdmin = im.User.GetIsAdmin()
 		return &im, nil
 	}
 }
@@ -185,4 +187,19 @@ func (db *DB) InsertIM(userId, emoji, picture string) (im *IRLMoji, err error) {
 		return nil, err
 	}
 	return im, nil
+}
+
+func (db *DB) DeleteIMWithId(imId uint64) error {
+	_, err := db.SQLDB.Exec(`
+        DELETE FROM heart WHERE irlmoji_id = $1`,
+		imId,
+	)
+	if err != nil {
+		return err
+	}
+	_, err = db.SQLDB.Exec(`
+        DELETE FROM irlmoji WHERE id = $1`,
+		imId,
+	)
+	return err
 }

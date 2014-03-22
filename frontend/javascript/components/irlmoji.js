@@ -46,6 +46,10 @@ var IRLMoji = React.createClass({
     var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
     var Emoji = capture.Emoji;
     var im = this.props.irlmoji;
+    var canDelete = (
+      (this.props.user && this.props.user.isAdmin) ||
+      (this.props.user && this.props.user.id === im.user.id)
+    );
     return (
       <div className="irlmoji">
         <ReactCSSTransitionGroup transitionName="actions">
@@ -66,6 +70,11 @@ var IRLMoji = React.createClass({
                     onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
                 <span className="num">{im.heartCount}</span>
               </span>
+              {canDelete ?
+                <span className="delete"
+                      onClick={_.partial(this.props.onEmojiTap, 'delete', im)}>
+                  <i className="fa fa-trash-o" />
+                </span> : null}
             </div> : []}
         </ReactCSSTransitionGroup>
         <img className="picture"

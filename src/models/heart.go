@@ -53,6 +53,7 @@ func HeartRowReturn(err error, heart *Heart) (*Heart, error) {
 	case err != nil:
 		return nil, err
 	default:
+		heart.User.IsAdmin = heart.User.GetIsAdmin()
 		return heart, nil
 	}
 }
@@ -92,6 +93,7 @@ func ParseHeartSQL(rows Scannable) (*Heart, error) {
 	case err != nil:
 		return nil, err
 	default:
+		heart.User.IsAdmin = heart.User.GetIsAdmin()
 		return &heart, nil
 	}
 }

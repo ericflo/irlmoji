@@ -117,6 +117,43 @@ func HandleGetIRLMoji(r render.Render, db *models.DB, params martini.Params, bac
 	r.JSON(200, map[string]*models.IRLMoji{"irlmoji": im})
 }
 
+func HandleDeleteIRLMoji(r render.Render, db *models.DB, params martini.Params, backchannel Backchannel) {
+	if backchannel.UserId() == "" {
+		r.JSON(403, JsonErr("The provided credentials were invalid."))
+		return
+	}
+
+	user, err := db.GetUserWithId(backchannel.UserId())
+	if err != nil {
+		r.JSON(403, "Could not find a user with your credentials.")
+		return
+	}
+
+	irlmojiId, err := strconv.ParseUint(params["irlmojiId"], 10, 64)
+	if err != nil {
+		r.JSON(404, JsonErr("Invalid IRLMoji id provided:"+
+			params["irlmojiId"]))
+	}
+
+	im, err := db.GetIMWithId(irlmojiId)
+	if err != nil {
+		r.JSON(404, JsonErr("The provided IRLMoji id was invalid."))
+		return
+	}
+
+	if im.UserId != user.Id && !user.IsAdmin {
+		r.JSON(403, "You are not allowed to delete that IRLMoji.")
+		return
+	}
+
+	err = db.DeleteIMWithId(im.Id)
+	if err != nil {
+		log.Println("Error deleting IRLMoji:", err.Error())
+		r.JSON(500, JsonErr("There was an error deleting that IRLMoji."))
+	}
+	r.JSON(200, map[string]string{"status": "ok"})
+}
+
 func HandleToggleHeart(r render.Render, bindErr binding.Errors, heart models.Heart, db *models.DB, backchannel Backchannel) {
 	if bindErr.Count() > 0 {
 		r.JSON(400, JsonErrBinding(bindErr))

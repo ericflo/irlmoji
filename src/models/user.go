@@ -16,7 +16,10 @@ type User struct {
 	TwitterAccessSecret string    `json:"-" binding:"required"`
 	TimeCreated         time.Time `json:"timeCreated"`
 	TimeUpdated         time.Time `json:"timeUpdated"`
+	IsAdmin             bool      `json:"isAdmin"`
 }
+
+var ADMIN_USER_IDS []string = []string{"14087951"}
 
 func (user *User) CreateTableSQL() string {
 	return `
@@ -34,6 +37,15 @@ func (user *User) CreateTableSQL() string {
     `
 }
 
+func (user *User) GetIsAdmin() bool {
+	for _, adminUserId := range ADMIN_USER_IDS {
+		if adminUserId == user.Id {
+			return true
+		}
+	}
+	return false
+}
+
 // This is needed because we don't want to expose the access token/secret
 // normally, but we do want to ingest them, and martini's binding module isn't
 // expressive enough to represent that concisely.
@@ -49,6 +61,7 @@ func UserRowReturn(err error, user *User) (*User, error) {
 	case err != nil:
 		return nil, err
 	default:
+		user.IsAdmin = user.GetIsAdmin()
 		return user, nil
 	}
 }

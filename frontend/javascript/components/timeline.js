@@ -62,6 +62,12 @@ var Timeline = React.createClass({
     this.setProps({timeline: timeline});
   },
 
+  removeIrlmojiAtIndex: function(idx) {
+    var timeline = this.props.timeline.slice(0);
+    timeline.splice(idx, 1);
+    this.setProps({timeline: timeline});
+  },
+
   handleToggleHeartResponse: function(error, resp) {
     if (error !== null) {
       // TODO: Decide how to really show this
@@ -71,11 +77,25 @@ var Timeline = React.createClass({
     this.updateIrlmojiAtIndex(idx, resp.irlmoji);
   },
 
+  handleDeleteEmojiResponse: function(error, resp) {
+    if (error !== null) {
+      // TODO: Decide how to really show this
+      return alert(error);
+    }
+  },
+
   handleEmojiTap: function(kind, im, ev) {
     if (kind === 'user') {
       this.props.app.router.go('/user/' + im.user.username);
     } else if (kind === 'picture') {
       this.props.app.router.go('/timeline/emoji/' + emoji.getDisplay(im.emoji));
+    } else if (kind === 'delete') {
+      var sure = confirm('Are you sure you want to delete this IRLMoji?');
+      if (sure) {
+        this.props.app.api.deleteIRLMoji(im.id, this.handleDeleteEmojiResponse);
+        var idx = this.getIrlmojiIndex(im.id);
+        this.removeIrlmojiAtIndex(idx);
+      }
     } else if (kind === 'heart') {
       this.props.app.api.toggleHeart(im.id, this.handleToggleHeartResponse);
       var idx = this.getIrlmojiIndex(im.id);
@@ -148,6 +168,7 @@ var Timeline = React.createClass({
               <IRLMoji key={im.id}
                        irlmoji={im}
                        app={this.props.app}
+                       user={this.props.user}
                        onEmojiTap={this.handleEmojiTap} />
             );
           }, this)}

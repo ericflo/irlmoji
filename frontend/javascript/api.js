@@ -77,6 +77,24 @@ function setupApi(opts) {
       .end(parseResponse(callback));
   }
 
+  function getIRLMoji(irlmojiId, limit, callback) {
+    var url = urlBase + '/api/v1/irlmoji/id/' + irlmojiId + '.json';
+    authed(request.get(url))
+      .query({limit: limit})
+      .set('Accept', 'application/json')
+      .end(parseResponse(callback));
+  }
+
+  function deleteIRLMoji(irlmojiId, callback) {
+    var url = urlBase + '/api/v1/irlmoji/id/' + irlmojiId + '.json';
+    authed(request.del(url))
+      .type('json')
+      .send({})
+      .set('Accept', 'application/json')
+      .set('X-CSRF-Token', csrf)
+      .end(parseResponse(callback));
+  }
+
   function getCSRF() {
     return csrf;
   }
@@ -89,6 +107,8 @@ function setupApi(opts) {
     getEmojiTimeline: getEmojiTimeline,
     createIRLMoji: createIRLMoji,
     toggleHeart: toggleHeart,
+    getIRLMoji: getIRLMoji,
+    deleteIRLMoji: deleteIRLMoji,
     getCSRF: getCSRF
   };
 }
