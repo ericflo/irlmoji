@@ -21,7 +21,6 @@ Install Yourself
 TODO
 ====
 * Tests (oops)
-* Figure out why it doesn't work when in production mode (WTF!?)
 * Parse Emoji upload
 * About page
 * Many many more things
