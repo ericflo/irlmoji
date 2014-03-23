@@ -169,7 +169,7 @@ function reactHandler(req, res, next) {
       CSRF_TOKEN: req.csrfToken(),
       SCRIPT_PATH: '/' + scriptPath + '?v=' + scriptVersion,
       STYLE_PATH: '/' + stylePath + '?v=' + styleVersion,
-      PAGE_TITLE: opts.pageTitle || 'IRLMoji'
+      PAGE_TITLE: opts.title || 'IRLMoji'
     };
     var re = new RegExp('{{ (' + _.keys(sub).join('|') + ') }}', 'g');
     res.writeHead(opts.statusCode || 200, {'Content-Type': 'text/html'});

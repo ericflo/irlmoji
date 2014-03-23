@@ -20,7 +20,7 @@ function render(reactElt, opts) {
   opts = opts || {};
   var elt = document.getElementById('react-root');
   document.body.setAttribute('class', opts.bodyClass || '');
-  document.title = opts.pageTitle || 'IRLMoji';
+  document.title = opts.title || 'IRLMoji';
   window.currentPage = React.renderComponent(reactElt, elt);
   app.loadingEnded();
 }
