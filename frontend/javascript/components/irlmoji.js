@@ -150,7 +150,8 @@ var IRLMojiDetail = React.createClass({
       <div>
         <div className="header container">
           <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
-          <p className="logout"><a href="/logout">Logout</a></p>
+          {this.props.user ?
+            <p className="logout"><a href="/logout">Logout</a></p> : null}
         </div>
         <div className="irlmoji-list">
           <IRLMoji key={im.id}

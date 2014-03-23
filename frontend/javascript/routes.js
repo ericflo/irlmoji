@@ -26,7 +26,6 @@ function handleServerError(app) {
 
 function handleAuth(app) {
   var Auth = auth.Auth;
-  console.log(Auth);
   app.render(<Auth app={app} onLogin={function(user) {
     console.log('inside');
     app.router.reload();
@@ -106,22 +105,24 @@ function handleTimelineEmoji(app, user, displayEmoji) {
   });
 }
 
-function handleIrlmoji(app, user, irlmojiId) {
+function handleIrlmoji(app, irlmojiId) {
   var irlmojiFunc = _.partial(app.api.getIRLMoji, irlmojiId);
-  var funcs = {irlmoji: _.partial(irlmojiFunc, DEFAULT_LIMIT)};
+  var funcs = {
+    irlmoji: _.partial(irlmojiFunc, DEFAULT_LIMIT),
+    user: app.api.getCurrentUser
+  };
   cachedFetch(funcs, function(error, data) {
     if (error) {
       return handleServerError(app);
     }
     var displayEmoji = emoji.getDisplay(data.irlmoji.irlmoji.emoji);
     app.render(<IRLMojiDetail app={app}
-                              user={user}
+                              user={data.user.user}
                               irlmoji={data.irlmoji.irlmoji}
                               limit={DEFAULT_LIMIT}
                               irlmojiFunc={irlmojiFunc} />, {
       title: displayEmoji + ' : IRLMoji',
       extraHead: meta.getDetailMeta(data.irlmoji.irlmoji),
-      user: user,
       data: data
     });
   });
@@ -134,7 +135,7 @@ function getRoutes(app) {
     ['/', prepareHandler(app, handleIndex, true)],
     ['/user/:username', prepareHandler(app, handleUserProfile, true)],
     ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)],
-    ['/irlmoji/:irlmojiId', prepareHandler(app, handleIrlmoji, true)]
+    ['/irlmoji/:irlmojiId', prepareHandler(app, handleIrlmoji)]
   ]
 }
 

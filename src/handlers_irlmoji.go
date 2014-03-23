@@ -133,6 +133,12 @@ func HandleGetIRLMoji(r render.Render, db *models.DB, params martini.Params, bac
 	} else {
 		log.Println("WARNING: Could not get IRLMoji hearts:", err.Error())
 	}
+	err = db.AnnotateHearted(im, backchannel.UserId())
+	if err != nil {
+		log.Println("Error annotating hearted info:", err.Error())
+		r.JSON(500, "Sorry, an internal server error has occurred.")
+		return
+	}
 	r.JSON(200, map[string]*models.IRLMoji{"irlmoji": im})
 }
 
