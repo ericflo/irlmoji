@@ -8,6 +8,7 @@ var auth = require('./components/auth');
 var Timeline = require('./components/timeline').Timeline;
 var IRLMojiDetail = require('./components/irlmoji').IRLMojiDetail;
 var emoji = require('./emoji');
+var meta = require('./meta');
 
 var DEFAULT_LIMIT = 10;
 
@@ -119,6 +120,7 @@ function handleIrlmoji(app, user, irlmojiId) {
                               limit={DEFAULT_LIMIT}
                               irlmojiFunc={irlmojiFunc} />, {
       title: displayEmoji + ' : IRLMoji',
+      extraHead: meta.getDetailMeta(data.irlmoji.irlmoji),
       user: user,
       data: data
     });
