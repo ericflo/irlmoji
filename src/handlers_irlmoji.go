@@ -9,8 +9,16 @@ import (
 	"strconv"
 )
 
+func hasMoreTimeline(limit Limit, timeline []*models.IRLMoji) (bool, []*models.IRLMoji) {
+	if len(timeline) <= int(limit.GetLimit()) {
+		return false, timeline
+	}
+	hasMore := len(timeline) == int(limit.GetLimit())+1
+	return hasMore, timeline[:limit.GetLimit()]
+}
+
 func HandleGetHomeTimeline(r render.Render, limit Limit, db *models.DB, backchannel Backchannel) {
-	timeline, err := db.GetAllIMs(limit.GetLimit())
+	timeline, err := db.GetAllIMs(limit.GetLimit() + uint32(1))
 	if err != nil {
 		r.JSON(500, JsonErr("Internal error: "+err.Error()))
 		return
@@ -23,7 +31,11 @@ func HandleGetHomeTimeline(r render.Render, limit Limit, db *models.DB, backchan
 			return
 		}
 	}
-	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
+	hasMore, timeline := hasMoreTimeline(limit, timeline)
+	r.JSON(200, map[string]interface{}{
+		"timeline": timeline,
+		"hasMore":  hasMore,
+	})
 }
 
 func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB, backchannel Backchannel) {
@@ -32,7 +44,7 @@ func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, 
 		r.JSON(404, JsonErr("Username '"+params["username"]+"' not found."))
 		return
 	}
-	timeline, err := db.GetIMsForUser(user.Id, limit.GetLimit())
+	timeline, err := db.GetIMsForUser(user.Id, limit.GetLimit()+uint32(1))
 	if err != nil {
 		log.Println("Error getting IMs for user", user.Username, err.Error())
 		r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
@@ -46,11 +58,15 @@ func HandleGetUserTimeline(r render.Render, limit Limit, params martini.Params, 
 			return
 		}
 	}
-	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
+	hasMore, timeline := hasMoreTimeline(limit, timeline)
+	r.JSON(200, map[string]interface{}{
+		"timeline": timeline,
+		"hasMore":  hasMore,
+	})
 }
 
 func HandleGetEmojiTimeline(r render.Render, limit Limit, params martini.Params, db *models.DB, backchannel Backchannel) {
-	timeline, err := db.GetIMsForEmoji(params["emoji"], limit.GetLimit())
+	timeline, err := db.GetIMsForEmoji(params["emoji"], limit.GetLimit()+uint32(1))
 	if err != nil {
 		log.Println("Error getting IMs for emoji", params["emoji"], err.Error())
 		r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
@@ -64,7 +80,11 @@ func HandleGetEmojiTimeline(r render.Render, limit Limit, params martini.Params,
 			return
 		}
 	}
-	r.JSON(200, map[string][]*models.IRLMoji{"timeline": timeline})
+	hasMore, timeline := hasMoreTimeline(limit, timeline)
+	r.JSON(200, map[string]interface{}{
+		"timeline": timeline,
+		"hasMore":  hasMore,
+	})
 }
 
 func HandleCreateIRLMoji(r render.Render, bindErr binding.Errors, im models.IRLMoji, db *models.DB, backchannel Backchannel) {
@@ -113,7 +133,6 @@ func HandleGetIRLMoji(r render.Render, db *models.DB, params martini.Params, bac
 	} else {
 		log.Println("WARNING: Could not get IRLMoji hearts:", err.Error())
 	}
-
 	r.JSON(200, map[string]*models.IRLMoji{"irlmoji": im})
 }
 

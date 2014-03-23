@@ -2,6 +2,7 @@ env.json
 build
 emoji.json
 import.py
+snapshot.py
 
 # Go stuff
 *.o

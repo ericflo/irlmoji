@@ -53,6 +53,7 @@ function handleIndex(app, user) {
     app.render(<Timeline app={app}
                          user={user}
                          timeline={data.timeline.timeline}
+                         hasMore={data.timeline.hasMore}
                          limit={DEFAULT_LIMIT}
                          timelineFunc={timelineFunc} />, {
       title: 'Welcome : IRLMoji',
@@ -72,6 +73,7 @@ function handleUserProfile(app, user, username) {
     app.render(<Timeline app={app}
                          user={user}
                          timeline={data.timeline.timeline}
+                         hasMore={data.timeline.hasMore}
                          limit={DEFAULT_LIMIT}
                          timelineFunc={timelineFunc} />, {
       title: username + ' : IRLMoji',
@@ -92,6 +94,7 @@ function handleTimelineEmoji(app, user, displayEmoji) {
     app.render(<Timeline app={app}
                          user={user}
                          timeline={data.timeline.timeline}
+                         hasMore={data.timeline.hasMore}
                          limit={DEFAULT_LIMIT}
                          timelineFunc={timelineFunc} />, {
       title: displayEmoji + ' : IRLMoji',

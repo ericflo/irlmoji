@@ -151,6 +151,9 @@ function parseResponse(callback) {
     if (res.body.irlmoji) {
       data.irlmoji = parseTimes(res.body.irlmoji);
     }
+    if (res.body.hasMore !== undefined) {
+      data.hasMore = res.body.hasMore;
+    }
     return callback(error, data);
   };
 }

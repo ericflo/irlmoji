@@ -114,7 +114,8 @@ var Timeline = React.createClass({
     var self = this;
     var preLength = this.props.timeline.length;
     this.setState({moreLoading: true}, function() {
-      self.props.timelineFunc(self.props.limit + 20, function(error, resp) {
+      var nextLimit = self.props.limit + 20;
+      self.props.timelineFunc(nextLimit, function(error, resp) {
         if (error !== null) {
           alert(error);
           return;
@@ -122,13 +123,12 @@ var Timeline = React.createClass({
         if (!self.isMounted()) {
           return;
         }
-        // If we haven't added any more, then there's no more to load, so we
-        // set the moreLoading variable to 'null' to indicate not to show it.
-        if (preLength === resp.timeline.length) {
-          return self.setState({moreLoading: null});
-        }
         self.setState({moreLoading: false}, function() {
-          self.setProps({timeline: resp.timeline});
+          self.setProps({
+            timeline: resp.timeline,
+            limit: nextLimit,
+            hasMore: resp.hasMore
+          });
         });
       });
     });
@@ -136,7 +136,7 @@ var Timeline = React.createClass({
   },
 
   renderMoreLoader: function() {
-    if (this.state.moreLoading === null) {
+    if (!this.props.hasMore) {
       return null;
     }
     if (this.state.moreLoading) {
