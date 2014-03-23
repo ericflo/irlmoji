@@ -6,6 +6,7 @@ var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
 var Timeline = require('./components/timeline').Timeline;
+var IRLMojiDetail = require('./components/irlmoji').IRLMojiDetail;
 var emoji = require('./emoji');
 
 var DEFAULT_LIMIT = 10;
@@ -104,13 +105,34 @@ function handleTimelineEmoji(app, user, displayEmoji) {
   });
 }
 
+function handleIrlmoji(app, user, irlmojiId) {
+  var irlmojiFunc = _.partial(app.api.getIRLMoji, irlmojiId);
+  var funcs = {irlmoji: _.partial(irlmojiFunc, DEFAULT_LIMIT)};
+  cachedFetch(funcs, function(error, data) {
+    if (error) {
+      return handleServerError(app);
+    }
+    var displayEmoji = emoji.getDisplay(data.irlmoji.irlmoji.emoji);
+    app.render(<IRLMojiDetail app={app}
+                              user={user}
+                              irlmoji={data.irlmoji.irlmoji}
+                              limit={DEFAULT_LIMIT}
+                              irlmojiFunc={irlmojiFunc} />, {
+      title: displayEmoji + ' : IRLMoji',
+      user: user,
+      data: data
+    });
+  });
+}
+
 // Generates the routes and binds function partials
 
 function getRoutes(app) {
   return [
     ['/', prepareHandler(app, handleIndex, true)],
     ['/user/:username', prepareHandler(app, handleUserProfile, true)],
-    ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)]
+    ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)],
+    ['/irlmoji/:irlmojiId', prepareHandler(app, handleIrlmoji, true)]
   ]
 }
 

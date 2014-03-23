@@ -42,6 +42,11 @@ var IRLMoji = React.createClass({
     this.setState({imageLoaded: true});
   },
 
+  handleImageClick: function(ev) {
+    this.props.app.router.go('/irlmoji/' + this.props.irlmoji.id);
+    return false;
+  },
+
   render: function() {
     var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
     var Emoji = capture.Emoji;
@@ -80,6 +85,7 @@ var IRLMoji = React.createClass({
         <img className="picture"
              src={this.getPicture()}
              onLoad={this.handleImageLoad}
+             onClick={this.handleImageClick}
              alt={'Picture for ' + emoji.getDisplay(im.emoji)} />
       </div>
     );
@@ -87,6 +93,92 @@ var IRLMoji = React.createClass({
 
 });
 
+var IRLMojiDetail = React.createClass({
+
+  handleDeleteEmojiResponse: function(error, resp) {
+    if (error !== null) {
+      // TODO: Decide how to really show this
+      return alert(error);
+    }
+  },
+
+  handleToggleHeartResponse: function(error, resp) {
+    if (error !== null) {
+      // TODO: Decide how to really show this
+      return alert(error);
+    }
+    this.setProps({irlmoji: _.extend({}, this.props.irlmoji, resp.irlmoji)});
+    this.props.app.router.reload();
+  },
+
+  handleUserClick: function(user, ev) {
+    this.props.app.router.go('/user/' + user.username);
+    return false;
+  },
+
+  handleEmojiTap: function(kind, im, ev) {
+    if (kind === 'user') {
+      this.props.app.router.go('/user/' + im.user.username);
+    } else if (kind === 'picture') {
+      this.props.app.router.go('/timeline/emoji/' + emoji.getDisplay(im.emoji));
+    } else if (kind === 'delete') {
+      var sure = confirm('Are you sure you want to delete this IRLMoji?');
+      if (sure) {
+        this.props.app.api.deleteIRLMoji(im.id, this.handleDeleteEmojiResponse);
+        this.props.app.router.go('/');
+      }
+    } else if (kind === 'heart') {
+      this.props.app.api.toggleHeart(im.id, this.handleToggleHeartResponse);
+      if (im.hearted) {
+        this.setProps({irlmoji: _.extend({}, this.props.irlmoji, {
+          hearted: false,
+          heartCount: im.heartCount - 1
+        })});
+      } else {
+        this.setProps({irlmoji: _.extend({}, this.props.irlmoji, {
+          hearted: true,
+          heartCount: im.heartCount + 1
+        })});
+      }
+    }
+    return false;
+  },
+
+  render: function() {
+    var im = this.props.irlmoji;
+    return (
+      <div>
+        <div className="header container">
+          <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
+          <p className="logout"><a href="/logout">Logout</a></p>
+        </div>
+        <div className="irlmoji-list">
+          <IRLMoji key={im.id}
+                   irlmoji={im}
+                   app={this.props.app}
+                   user={this.props.user}
+                   onEmojiTap={this.handleEmojiTap} />
+        </div>
+        <ul className="hearts">
+          {_.map(im.hearts || [], function(heart, i) {
+            return (
+              <li key={i}>
+                <i className="fa fa-heart" />{' '}
+                <a href={'/user/' + heart.user.username}
+                   onClick={_.partial(this.handleUserClick, heart.user)}>
+                   {heart.user.username}
+                </a>
+              </li>
+            );
+          }, this)}
+        </ul>
+      </div>
+    );
+  }
+
+});
+
 module.exports = {
-  IRLMoji: IRLMoji
+  IRLMoji: IRLMoji,
+  IRLMojiDetail: IRLMojiDetail
 };
