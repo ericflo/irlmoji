@@ -6,6 +6,7 @@ respawn
 chdir /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
 
 env GOPATH=/home/{{ appuser }}/go
+env MARTINI_ENV=production
 
 pre-start script
     chpst -u {{ appuser }} go get

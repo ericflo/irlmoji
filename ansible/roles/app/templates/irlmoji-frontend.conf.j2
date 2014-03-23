@@ -3,6 +3,8 @@ stop on runlevel [016]
 
 respawn
 
+env NODE_ENV=production
+
 chdir /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }}
 
 exec chpst -u {{ appuser }} node server.js
