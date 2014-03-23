@@ -100,6 +100,32 @@ func (db *DB) GetUserWithUsername(username string) (*User, error) {
 	return UserRowReturn(err, &user)
 }
 
+func (db *DB) UpdateUserAuth(id, twitterAccessToken, twitterAccessSecret string) (*User, error) {
+	user, err := db.GetUserWithId(id)
+	if err != nil {
+		return user, err
+	}
+	user.TwitterAccessToken = twitterAccessToken
+	user.TwitterAccessSecret = twitterAccessSecret
+	user.TimeUpdated = time.Now().UTC()
+	_, err = db.SQLDB.Exec(`
+		UPDATE auth_user
+		SET twitter_access_token = $1, twitter_access_secret = $2,
+		    time_updated = $3
+		WHERE id = $4
+		`,
+		user.TwitterAccessToken,
+		user.TwitterAccessSecret,
+		user.TimeUpdated,
+		user.Id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (db *DB) CreateUser(id, username, pic, twitterAccessToken, twitterAccessSecret string) (*User, error) {
 	t := time.Now().UTC()
 	user := User{

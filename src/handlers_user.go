@@ -66,6 +66,13 @@ func HandleCreateUserByTwitter(r render.Render, bindErr binding.Errors, userForm
 
 	user, err := db.GetUserWithId(result.IdStr())
 	if err == nil {
+		user, err = db.UpdateUserAuth(user.Id, userForm.TwitterAccessToken,
+			userForm.TwitterAccessSecret)
+		if err != nil {
+			log.Println("Error updating user auth:", err.Error())
+			r.JSON(500, JsonErr("Sorry, an internal server error has occurred."))
+			return
+		}
 		r.JSON(200, map[string]*models.User{"user": user})
 		return
 	}
