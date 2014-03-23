@@ -122,7 +122,7 @@ function handleIrlmoji(app, irlmojiId) {
                               limit={DEFAULT_LIMIT}
                               irlmojiFunc={irlmojiFunc} />, {
       title: displayEmoji + ' : IRLMoji',
-      extraHead: meta.getDetailMeta(data.irlmoji.irlmoji),
+      extraHead: meta.getDetailMeta(data.irlmoji.irlmoji, app.getUrl()),
       data: data
     });
   });
