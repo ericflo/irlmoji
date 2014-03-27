@@ -20,8 +20,8 @@ Install Yourself
 
 TODO
 ====
-* Parse Emoji upload
-* Lock down ports
+* Parse actual emoji unicode code points after picture upload instead of making
+  users type in the english version
 * Make sure you don't have to tap on the emoji image itself but can tap on the
-  whole row (iOS specifically.)
-* Offer to tweet
+  whole row after picture upload (iOS specifically)
+* Offer to tweet out after posting a new IRLMoji
