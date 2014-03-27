@@ -25,7 +25,7 @@ var Auth = React.createClass({
 
   handleTwitterClick: function(ev) {
     var dialog = utils.openDialog('/auth/twitter', 'twitter-login', 550, 420);
-    var interval = this.setInterval(_.bind(function() {
+    this.setInterval(_.bind(function() {
       if (!dialog.closed) {
         return;
       }

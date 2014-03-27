@@ -44,6 +44,7 @@ if (typeof window === 'undefined') {
         return this.callCb({cb: route.cb, match: match});
       }
     }
+    return this.notFound();
   };
 } else {
   // We're on the client

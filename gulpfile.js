@@ -11,6 +11,7 @@ var minifycss = require('gulp-minify-css');
 var nodemon = require('gulp-nodemon');
 //var livereload = require('gulp-livereload')
 var utils = require('./frontend/javascript/utils');
+var mocha = require('gulp-mocha');
 
 utils.readEnv();
 
@@ -21,12 +22,12 @@ gulp.task('clean', function() {
 // Parse and compress JS and JSX files
 
 gulp.task('javascript', function() {
-  return gulp.src('frontend/**/*.js')
+  return gulp.src('frontend/javascript/**/*.js')
     .pipe(react())
-    .pipe(gulp.dest('build/'))
+    .pipe(gulp.dest('build/javascript/'))
     .pipe(uglify())
     .pipe(rename({suffix: '.min'}))
-    .pipe(gulp.dest('build/'));
+    .pipe(gulp.dest('build/javascript/'));
 });
 
 // Browserify the source tree into a client-side library
@@ -63,6 +64,17 @@ gulp.task('styles', function() {
 gulp.task('images', function() {
   return gulp.src('frontend/images/**/*')
     .pipe(gulp.dest('build/images/'));
+});
+
+// Testing
+
+gulp.task('javascript_test', function() {
+  return gulp.src('frontend/tests/**/*.js')
+    .pipe(gulp.dest('build/tests/'));
+});
+
+gulp.task('test', ['javascript', 'javascript_test'], function() {
+  return gulp.src('build/tests/**/*.js').pipe(mocha());
 });
 
 // Local development (live reloading)
