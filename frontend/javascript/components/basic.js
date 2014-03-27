@@ -17,6 +17,15 @@ var About = React.createClass({
             However, it is also a demo of how to set up a React.js site that
             renders both on the server and the client.
           </p>
+          <p>
+            There will be a series of posts explaining more about how all this
+            code fits together at{' '}
+            <a href="http://eflorenzano.com/">eflorenzano.com</a>.
+          </p>
+          <p>
+            It is also available on GitHub at{' '}
+            <a href="https://github.com/ericflo/irlmoji">https://github.com/ericflo/irlmoji</a>
+          </p>
         </div>
       </div>
     );
