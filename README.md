@@ -20,12 +20,9 @@ Install Yourself
 
 TODO
 ====
-* Tests (oops)
 * Parse Emoji upload
 * About page
-* Many many more things
 * Lock down ports
 * Make sure you don't have to tap on the emoji image itself but can tap on the
   whole row (iOS specifically.)
 * Offer to tweet
-* Make sure http://irlmoji.com routes to the proper server
