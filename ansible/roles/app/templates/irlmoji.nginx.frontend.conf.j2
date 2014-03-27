@@ -11,7 +11,14 @@ server {
 
 server {
     listen 443;
-    server_name www.irlmoji.com irlmoji.com;
+    server_name irlmoji.com;
+    include /etc/nginx/spdy;
+    return 301 https://www.irlmoji.com$request_uri;
+}
+
+server {
+    listen 443;
+    server_name www.irlmoji.com;
 
     access_log /var/log/nginx/frontend.https.access.log;
     root /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }};
