@@ -4,14 +4,14 @@ upstream frontend {
 
 server {
     listen 80;
-    server_name www.irlmoji.com;
+    server_name www.irlmoji.com irlmoji.com;
 
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443;
-    server_name www.irlmoji.com;
+    server_name www.irlmoji.com irlmoji.com;
 
     access_log /var/log/nginx/frontend.https.access.log;
     root /home/{{ appuser }}/go/src/github.com/ericflo/{{ appname }};
