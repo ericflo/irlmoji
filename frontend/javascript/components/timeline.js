@@ -3,6 +3,7 @@
 var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
 var capture = require('./capture');
+var common = require('./common');
 var irlmoji = require('./irlmoji');
 var emoji = require('../emoji');
 
@@ -13,11 +14,6 @@ var Timeline = React.createClass({
       imagePath: null,
       moreLoading: false
     };
-  },
-
-  handleClick: function(ev) {
-    this.props.app.router.go('/');
-    return false;
   },
 
   handlePostImageUpload: function(path) {
@@ -149,6 +145,7 @@ var Timeline = React.createClass({
     var Capture = capture.Capture;
     var EmojiPicker = capture.EmojiPicker;
     var IRLMoji = irlmoji.IRLMoji;
+    var Header = common.Header;
     if (this.state.imagePath) {
       return (
         <EmojiPicker app={this.props.app}
@@ -158,10 +155,7 @@ var Timeline = React.createClass({
     }
     return (
       <div>
-        <div className="header container">
-          <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
-          <p className="logout"><a href="/logout">Logout</a></p>
-        </div>
+        <Header app={this.props.app} user={this.props.user} />
         <div className="irlmoji-list">
           {_.map(this.props.timeline, function(im) {
             return (

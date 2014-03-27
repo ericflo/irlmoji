@@ -3,6 +3,7 @@
 var _ = require('lodash/dist/lodash.underscore');
 var React = require('react/addons');
 var capture = require('./capture');
+var common = require('./common');
 var emoji = require('../emoji');
 
 var IRLMoji = React.createClass({
@@ -145,14 +146,11 @@ var IRLMojiDetail = React.createClass({
   },
 
   render: function() {
+    var Header = common.Header;
     var im = this.props.irlmoji;
     return (
       <div>
-        <div className="header container">
-          <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
-          {this.props.user ?
-            <p className="logout"><a href="/logout">Logout</a></p> : null}
-        </div>
+        <Header app={this.props.app} user={this.props.user} />
         <div className="irlmoji-list">
           <IRLMoji key={im.id}
                    irlmoji={im}

@@ -5,6 +5,7 @@ var React = require('react/addons');
 var async = require('async');
 var common = require('./components/common');
 var auth = require('./components/auth');
+var basic = require('./components/basic');
 var Timeline = require('./components/timeline').Timeline;
 var IRLMojiDetail = require('./components/irlmoji').IRLMojiDetail;
 var emoji = require('./emoji');
@@ -128,11 +129,23 @@ function handleIrlmoji(app, irlmojiId) {
   });
 }
 
+function handleAbout(app) {
+  var funcs = {user: app.api.getCurrentUser};
+  cachedFetch(funcs, function(error, data) {
+    var About = basic.About;
+    app.render(<About app={app} user={data.user.user} />, {
+      title: 'About IRLMoji',
+      data: data
+    });
+  });
+}
+
 // Generates the routes and binds function partials
 
 function getRoutes(app) {
   return [
     ['/', prepareHandler(app, handleIndex, true)],
+    ['/about', prepareHandler(app, handleAbout), {serverOnly: true}],
     ['/user/:username', prepareHandler(app, handleUserProfile, true)],
     ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)],
     ['/irlmoji/:irlmojiId', prepareHandler(app, handleIrlmoji)]
