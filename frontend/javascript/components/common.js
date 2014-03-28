@@ -37,8 +37,8 @@ var ServerError = React.createClass({
 });
 
 var Header = React.createClass({
-  handleClick: function(ev) {
-    this.props.app.router.go('/');
+  handleClick: function(path, ev) {
+    this.props.app.router.go(path);
     return false;
   },
 
@@ -47,14 +47,18 @@ var Header = React.createClass({
   },
 
   render: function() {
+    var handleHomeClick = _.partial(this.handleClick, '/');
+    var handleMeClick = _.partial(this.handleClick, '/me');
     return (
       <div className="header container">
-        <h1><a href="/" onClick={this.handleClick}>IRLMoji</a></h1>
+        <h1><a href="/" onClick={handleHomeClick}>IRLMoji</a></h1>
         <ul className="opts">
           <li>{this.aboutSelected() ?
             <span>About</span> :
             <a className={'about' + (this.aboutSelected() ? ' selected' : '')}
                href="/about">About</a>}</li>
+          {this.props.user ?
+            <li><a href="/me" onClick={handleMeClick}>Your IRLMoji</a></li> : null}
           {this.props.user ? <li><a href="/logout">Logout</a></li> : null}
         </ul>
       </div>
