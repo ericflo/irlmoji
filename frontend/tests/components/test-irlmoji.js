@@ -38,8 +38,7 @@ describe('An IRLMojiDetail component', function() {
 
   it('should render without error', function() {
     var im = {id: 1, emoji: '1f358'};
-    var app = {getPath: function() { return '/'; }};
-    var i = irlmoji.IRLMojiDetail({irlmoji: im, app: app});
+    var i = irlmoji.IRLMojiDetail({irlmoji: im});
     assert.doesNotThrow(function() {
       ReactTestUtils.renderIntoDocument(i);
     });

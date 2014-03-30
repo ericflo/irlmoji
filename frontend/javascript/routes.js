@@ -45,52 +45,8 @@ function cachedFetch(funcs, callback) {
 
 // The handlers themselves
 
-function handleIndex(app) {
+function handleIndex(app, user) {
   var timelineFunc = app.api.getHomeTimeline;
-  var funcs = {
-    timeline: _.partial(timelineFunc, DEFAULT_LIMIT),
-    user: app.api.getCurrentUser
-  };
-  cachedFetch(funcs, function(error, data) {
-    if (error) {
-      return handleServerError(app);
-    }
-    app.render(<Timeline app={app}
-                         user={data.user.user}
-                         timeline={data.timeline.timeline}
-                         hasMore={data.timeline.hasMore}
-                         limit={DEFAULT_LIMIT}
-                         timelineFunc={timelineFunc} />, {
-      title: 'Welcome : IRLMoji',
-      data: data
-    });
-  });
-}
-
-function handleUserProfile(app, username) {
-  var timelineFunc = _.partial(app.api.getUserTimeline, username);
-  var funcs = {
-    timeline: _.partial(timelineFunc, DEFAULT_LIMIT),
-    user: app.api.getCurrentUser
-  };
-  cachedFetch(funcs, function(error, data) {
-    if (error) {
-      return handleServerError(app);
-    }
-    app.render(<Timeline app={app}
-                         user={data.user.user}
-                         timeline={data.timeline.timeline}
-                         hasMore={data.timeline.hasMore}
-                         limit={DEFAULT_LIMIT}
-                         timelineFunc={timelineFunc} />, {
-      title: username + ' : IRLMoji',
-      data: data,
-    });
-  });
-}
-
-function handleMe(app, user) {
-  var timelineFunc = _.partial(app.api.getUserTimeline, user.username);
   var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
   cachedFetch(funcs, function(error, data) {
     if (error) {
@@ -102,31 +58,49 @@ function handleMe(app, user) {
                          hasMore={data.timeline.hasMore}
                          limit={DEFAULT_LIMIT}
                          timelineFunc={timelineFunc} />, {
-      title: user.username + ' : IRLMoji',
+      title: 'Welcome : IRLMoji',
+      user: user,
+      data: data
+    });
+  });
+}
+
+function handleUserProfile(app, user, username) {
+  var timelineFunc = _.partial(app.api.getUserTimeline, username);
+  var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
+  cachedFetch(funcs, function(error, data) {
+    if (error) {
+      return handleServerError(app);
+    }
+    app.render(<Timeline app={app}
+                         user={user}
+                         timeline={data.timeline.timeline}
+                         hasMore={data.timeline.hasMore}
+                         limit={DEFAULT_LIMIT}
+                         timelineFunc={timelineFunc} />, {
+      title: username + ' : IRLMoji',
       user: user,
       data: data,
     });
   });
 }
 
-function handleTimelineEmoji(app, displayEmoji) {
+function handleTimelineEmoji(app, user, displayEmoji) {
   var emojiKey = emoji.keyFromDisplay(displayEmoji);
   var timelineFunc = _.partial(app.api.getEmojiTimeline, emojiKey);
-  var funcs = {
-    timeline: _.partial(timelineFunc, DEFAULT_LIMIT),
-    user: app.api.getCurrentUser
-  };
+  var funcs = {timeline: _.partial(timelineFunc, DEFAULT_LIMIT)};
   cachedFetch(funcs, function(error, data) {
     if (error) {
       return handleServerError(app);
     }
     app.render(<Timeline app={app}
-                         user={data.user.user}
+                         user={user}
                          timeline={data.timeline.timeline}
                          hasMore={data.timeline.hasMore}
                          limit={DEFAULT_LIMIT}
                          timelineFunc={timelineFunc} />, {
       title: displayEmoji + ' : IRLMoji',
+      user: user,
       data: data
     });
   });
@@ -170,11 +144,10 @@ function handleAbout(app) {
 
 function getRoutes(app) {
   return [
-    ['/', prepareHandler(app, handleIndex)],
+    ['/', prepareHandler(app, handleIndex, true)],
     ['/about', prepareHandler(app, handleAbout), {serverOnly: true}],
-    ['/me', prepareHandler(app, handleMe, true)],
-    ['/user/:username', prepareHandler(app, handleUserProfile)],
-    ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji)],
+    ['/user/:username', prepareHandler(app, handleUserProfile, true)],
+    ['/timeline/emoji/:displayEmoji', prepareHandler(app, handleTimelineEmoji, true)],
     ['/irlmoji/:irlmojiId', prepareHandler(app, handleIrlmoji)]
   ]
 }

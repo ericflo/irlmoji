@@ -17,8 +17,7 @@ describe('A Timeline component', function() {
   });
 
   it('should render without error', function() {
-    var app = {getPath: function() { return '/'; }};
-    var t = timeline.Timeline({app: app});
+    var t = timeline.Timeline();
     assert.doesNotThrow(function() {
       ReactTestUtils.renderIntoDocument(t);
     });
