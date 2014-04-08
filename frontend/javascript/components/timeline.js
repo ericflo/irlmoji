@@ -169,6 +169,7 @@ var Timeline = React.createClass({
         </div>
         {this.renderMoreLoader()}
         <Capture app={this.props.app}
+                 user={this.props.user}
                  onPostImageUpload={this.handlePostImageUpload} />
       </div>
     );

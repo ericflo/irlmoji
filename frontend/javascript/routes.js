@@ -12,6 +12,7 @@ var emoji = require('./emoji');
 var meta = require('./meta');
 
 var DEFAULT_LIMIT = 10;
+var AUTH_REDIRECT_URL = '/';
 
 // Basic handlers for things like not found pages, server errors, and auth
 
@@ -26,11 +27,20 @@ function handleServerError(app) {
 }
 
 function handleAuth(app) {
-  var Auth = auth.Auth;
-  app.render(<Auth app={app} onLogin={function(user) {
-    console.log('inside');
-    app.router.reload();
-  }} />);
+  app.api.getCurrentUser(function(error, data) {
+    var next = app.getParams().next;
+    if (!next || next.indexOf('/') !== 0) {
+      next = AUTH_REDIRECT_URL;
+    }
+    if (data.user) {
+      app.router.go(next);
+      return;
+    }
+    var Auth = auth.Auth;
+    app.render(<Auth app={app} onLogin={function(user) {
+      app.router.go(next);
+    }} />);
+  });
 }
 
 // Utilities
@@ -171,6 +181,7 @@ function handleAbout(app) {
 function getRoutes(app) {
   return [
     ['/', prepareHandler(app, handleIndex)],
+    ['/auth', prepareHandler(app, handleAuth)],
     ['/about', prepareHandler(app, handleAbout), {serverOnly: true}],
     ['/me', prepareHandler(app, handleMe, true)],
     ['/user/:username', prepareHandler(app, handleUserProfile)],

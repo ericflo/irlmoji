@@ -49,6 +49,20 @@ var app = {
   getUserAgent: _.memoize(function() {
     return navigator.userAgent;
   }),
+  getParams: function() {
+    var match;
+    var pl = /\+/g;
+    var search = /([^&=]+)=?([^&]*)/g;
+    var decode = function(s) {
+      return decodeURIComponent(s.replace(pl, ' '));
+    };
+    var query = window.location.search.substring(1);
+    var urlParams = {};
+    while (match = search.exec(query)) {
+      urlParams[decode(match[1])] = decode(match[2]);
+    }
+    return urlParams;
+  },
   loadingBegan: function() {
     if (window.NProgress && !window.BOOTSTRAPPING) {
       NProgress.start();

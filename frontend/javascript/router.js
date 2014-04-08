@@ -1,3 +1,5 @@
+var qs = require('qs');
+
 var REPLACE_RE = /((:[a-z_$][a-z0-9_$]*))/ig;
 
 function rt(r, c, o, i, m) {
@@ -33,7 +35,7 @@ Router.prototype.callCb = function(route) {
 
 if (typeof window === 'undefined') {
   // We're on the server
-  Router.prototype.route = function(path) {
+  Router.prototype.go = function(path) {
     for (var i = 0; i < this._routes.length; ++i) {
       var route = this._routes[i];
       if (route.opt.clientOnly) {
@@ -78,9 +80,10 @@ if (typeof window === 'undefined') {
     this.handle();
   };
 
-  Router.prototype.go = function(path) {
+  Router.prototype.go = function(path, query) {
     if (window.history.pushState) {
-      window.history.pushState(null, '', path);
+      window.history.pushState(null, '', path +
+        (query ? '?' + qs.stringify(query) : ''));
       var route = this.getRouteForPath(path, false);
       if (!route) {
         return this.notFound();

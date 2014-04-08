@@ -31,7 +31,18 @@ var Capture = React.createClass({
     xhr.setRequestHeader('X-CSRF-Token', this.props.app.api.getCSRF());
   },
 
+  handleClick: function(ev) {
+    this.props.app.router.go('/auth', {next: this.props.app.getPath()});
+  },
+
   render: function() {
+    if (!this.props.user) {
+      return (
+        <div className="dropzone capture" onClick={this.handleClick}>
+          <i className="fa fa-camera-retro" />
+        </div>
+      );
+    }
     return (
       <ReactDropzone action="/upload"
                      ref="dropzone"

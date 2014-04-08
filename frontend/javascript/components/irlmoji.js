@@ -48,6 +48,15 @@ var IRLMoji = React.createClass({
     return false;
   },
 
+  handleEmojiTap: function(kind, im, ev) {
+    if (kind === 'heart' && !this.props.user) {
+      this.props.app.router.go('/auth', {next: this.props.app.getPath()});
+      return false;
+    }
+    this.props.onEmojiTap(kind, im, ev);
+    return false;
+  },
+
   render: function() {
     var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
     var Emoji = capture.Emoji;
@@ -64,21 +73,21 @@ var IRLMoji = React.createClass({
               <img className="userpic"
                    src={this.getUserPic()}
                    alt={im.user.username}
-                   onClick={_.partial(this.props.onEmojiTap, 'user', im)} />
+                   onClick={_.partial(this.handleEmojiTap, 'user', im)} />
               <Emoji app={this.props.app}
                      emoji={im.emoji}
-                     onClick={_.partial(this.props.onEmojiTap, 'picture', im)} />
+                     onClick={_.partial(this.handleEmojiTap, 'picture', im)} />
               <span className="heart icon"
-                    onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
+                    onClick={_.partial(this.handleEmojiTap, 'heart', im)}>
                 <i className={'fa fa-heart' + (im.hearted ? '' : '-o hearted')}></i>
               </span>
               <span className="heart count"
-                    onClick={_.partial(this.props.onEmojiTap, 'heart', im)}>
+                    onClick={_.partial(this.handleEmojiTap, 'heart', im)}>
                 <span className="num">{im.heartCount}</span>
               </span>
               {canDelete ?
                 <span className="delete"
-                      onClick={_.partial(this.props.onEmojiTap, 'delete', im)}>
+                      onClick={_.partial(this.handleEmojiTap, 'delete', im)}>
                   <i className="fa fa-trash-o" />
                 </span> : null}
             </div> : []}

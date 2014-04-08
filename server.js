@@ -196,7 +196,10 @@ function reactHandler(req, res, next) {
     },
     getUserAgent: _.memoize(function() {
       return req.headers['user-agent'] || '';
-    })
+    }),
+    getParams: function() {
+      return req.query;
+    }
   };
 
   var router = makeRouter(
@@ -204,7 +207,7 @@ function reactHandler(req, res, next) {
     routes.getNotFound(app)
   );
 
-  router.route(app.getPath());
+  router.go(app.getPath());
 }
 
 // Set up the application and run it

@@ -36,19 +36,29 @@ var Auth = React.createClass({
   },
 
   render: function() {
+    var Header = common.Header;
     return (
-      <div className="social-login">
-        <a className="btn twitter-connect"
-           href="#"
-           onClick={this.handleTwitterClick}>
-          <span className="social-icon">
-            <i className="fa fa-twitter" />
-          </span>
-          <span className="social-text">
-            <small>Connect with</small> Twitter
-          </span>
-        </a>
-        <div className="clearfix"></div>
+      <div>
+        <Header app={this.props.app} user={this.props.user} />
+        <div className="container">
+          <div className="social-login">
+            <h1>
+              Connect with Twitter to Play!<br />
+              <small>(We won&rsquo;t ever post anything)</small>
+            </h1>
+            <a className="btn twitter-connect"
+               href="#"
+               onClick={this.handleTwitterClick}>
+              <span className="social-icon">
+                <i className="fa fa-twitter" />
+              </span>
+              <span className="social-text">
+                <small>Connect with</small> Twitter
+              </span>
+            </a>
+            <div className="clearfix"></div>
+          </div>
+        </div>
       </div>
     );
   }
