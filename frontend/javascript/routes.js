@@ -12,7 +12,7 @@ var emoji = require('./emoji');
 var meta = require('./meta');
 
 var DEFAULT_LIMIT = 10;
-var AUTH_REDIRECT_URL = '/';
+var AUTH_REDIRECT_URL = process.env.AUTH_REDIRECT_URL || '/';
 
 // Basic handlers for things like not found pages, server errors, and auth
 
